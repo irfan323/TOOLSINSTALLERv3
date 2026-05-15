@@ -232,6 +232,10 @@ td{padding:10px 14px;vertical-align:middle;color:var(--txt);}
 .b-pending::before{background:#fbbf24;box-shadow:0 0 6px #fbbf24;}
 .b-lulus{background:rgba(168,85,247,.15);color:#c084fc;border:1px solid rgba(168,85,247,.3);}
 .b-lulus::before{background:#a855f7;box-shadow:0 0 6px #a855f7;}
+.b-kompeten{background:rgba(0,229,255,.15);color:#00e5ff;border:1px solid rgba(0,229,255,.3);}
+.b-kompeten::before{background:#00e5ff;box-shadow:0 0 6px #00e5ff;}
+.b-belumkompeten{background:rgba(249,115,22,.15);color:#fb923c;border:1px solid rgba(249,115,22,.3);}
+.b-belumkompeten::before{background:#f97316;box-shadow:0 0 6px #f97316;}
 
 /* PAGINATION */
 .pagination{
@@ -578,7 +582,7 @@ select.form-control option{background:var(--bg);}
             <select class="fsel" id="fPend" onchange="applyFilters()"><option value="">Semua Pendidikan</option></select>
             <select class="fsel" id="fStat" onchange="applyFilters()">
               <option value="">Semua Status</option>
-              <option>Aktif</option><option>Tidak Hadir</option><option>Sakit</option><option>Lulus</option>
+              <option>Aktif</option><option>Tidak Hadir</option><option>Sakit</option><option>Lulus</option><option>Kompeten</option><option>Belum Kompeten</option>
             </select>
           </div>
         </div>
@@ -633,7 +637,7 @@ select.form-control option{background:var(--bg);}
             <thead>
               <tr>
                 <th>No</th><th>Program Pelatihan</th><th>Jml Peserta</th>
-                <th>L</th><th>P</th><th>Aktif</th><th>Tdk Hadir</th><th>Sakit</th><th>Lulus</th>
+                <th>L</th><th>P</th><th>Aktif</th><th>Tdk Hadir</th><th>Sakit</th><th>Lulus</th><th>Kompeten</th><th>Blm Kompeten</th>
               </tr>
             </thead>
             <tbody id="laporanBody"></tbody>
@@ -933,7 +937,7 @@ function renderDashboard(){
   `;
 
   // Donut status
-  const statuses = [{k:'Aktif',c:'#10b981'},{k:'Lulus',c:'#a855f7'},{k:'Tidak Hadir',c:'#f43f5e'},{k:'Sakit',c:'#fbbf24'}];
+  const statuses = [{k:'Aktif',c:'#10b981'},{k:'Lulus',c:'#a855f7'},{k:'Kompeten',c:'#00e5ff'},{k:'Belum Kompeten',c:'#f97316'},{k:'Tidak Hadir',c:'#f43f5e'},{k:'Sakit',c:'#fbbf24'}];
   const counts = statuses.map(s=>({...s,n:DB.filter(d=>d.status===s.k).length}));
   renderDonut(counts, total, 'donutSvg', 'donutLegend');
 
@@ -1096,7 +1100,7 @@ function renderTable(){
   const pages=Math.max(1,Math.ceil(total/pageSize));
   if(curPage>pages) curPage=pages;
   const slice=filteredData.slice((curPage-1)*pageSize,curPage*pageSize);
-  const badgeCls={'Aktif':'b-aktif','Tidak Hadir':'b-nonaktif','Sakit':'b-pending','Lulus':'b-lulus'};
+  const badgeCls={'Aktif':'b-aktif','Tidak Hadir':'b-nonaktif','Sakit':'b-pending','Lulus':'b-lulus','Kompeten':'b-kompeten','Belum Kompeten':'b-belumkompeten'};
   document.getElementById('tblBody').innerHTML = slice.map((d,i)=>`
     <tr>
       <td style="color:var(--txt3);font-size:12px">${(curPage-1)*pageSize+i+1}</td>
@@ -1193,7 +1197,7 @@ function deletePeserta(id){
 function renderKartu(){
   const prog = document.getElementById('kProg')?.value||'';
   const data = prog? DB.filter(d=>d.program===prog) : DB;
-  const badgeCls={'Aktif':'b-aktif','Tidak Hadir':'b-nonaktif','Sakit':'b-pending','Lulus':'b-lulus'};
+  const badgeCls={'Aktif':'b-aktif','Tidak Hadir':'b-nonaktif','Sakit':'b-pending','Lulus':'b-lulus','Kompeten':'b-kompeten','Belum Kompeten':'b-belumkompeten'};
   document.getElementById('kartuGrid').innerHTML = data.map((d,i)=>{
     const init = (d.nama||'?').split(' ').map(w=>w[0]).join('').toUpperCase().substring(0,2);
     const ci = i%NEON.length;
@@ -1227,22 +1231,26 @@ function renderLaporan(){
   const progMap = {};
   DB.forEach(d=>{
     const p=d.program||'–';
-    if(!progMap[p]) progMap[p]={n:0,l:0,pr:0,aktif:0,tdk:0,sakit:0,lulus:0};
+    if(!progMap[p]) progMap[p]={n:0,l:0,pr:0,aktif:0,tdk:0,sakit:0,lulus:0,kompeten:0,blmKompeten:0};
     const r=progMap[p];
     r.n++; if(d.gender==='Laki-laki')r.l++;else r.pr++;
     if(d.status==='Aktif')r.aktif++;
     else if(d.status==='Tidak Hadir')r.tdk++;
     else if(d.status==='Sakit')r.sakit++;
     else if(d.status==='Lulus')r.lulus++;
+    else if(d.status==='Kompeten')r.kompeten++;
+    else if(d.status==='Belum Kompeten')r.blmKompeten++;
   });
   const rows=Object.entries(progMap).sort((a,b)=>b[1].n-a[1].n);
-  const total={n:DB.length,l:0,pr:0,aktif:0,tdk:0,sakit:0,lulus:0};
+  const total={n:DB.length,l:0,pr:0,aktif:0,tdk:0,sakit:0,lulus:0,kompeten:0,blmKompeten:0};
   DB.forEach(d=>{
     if(d.gender==='Laki-laki')total.l++;else total.pr++;
     if(d.status==='Aktif')total.aktif++;
     else if(d.status==='Tidak Hadir')total.tdk++;
     else if(d.status==='Sakit')total.sakit++;
     else if(d.status==='Lulus')total.lulus++;
+    else if(d.status==='Kompeten')total.kompeten++;
+    else if(d.status==='Belum Kompeten')total.blmKompeten++;
   });
   document.getElementById('laporanBody').innerHTML = rows.map(([k,v],i)=>`
     <tr>
@@ -1254,6 +1262,8 @@ function renderLaporan(){
       <td style="color:#fb7185">${v.tdk}</td>
       <td style="color:#fbbf24">${v.sakit}</td>
       <td style="color:#c084fc">${v.lulus}</td>
+      <td style="color:#00e5ff">${v.kompeten||0}</td>
+      <td style="color:#fb923c">${v.blmKompeten||0}</td>
     </tr>`).join('')+`
   <tr style="background:rgba(0,229,255,.05);font-weight:700;border-top:2px solid var(--cyan)">
     <td colspan="2" style="color:var(--cyan)">TOTAL</td>
@@ -1263,6 +1273,8 @@ function renderLaporan(){
     <td style="color:#fb7185">${total.tdk}</td>
     <td style="color:#fbbf24">${total.sakit}</td>
     <td style="color:#c084fc">${total.lulus}</td>
+    <td style="color:#00e5ff">${total.kompeten}</td>
+    <td style="color:#fb923c">${total.blmKompeten}</td>
   </tr>`;
 
   // Gender per program chart
