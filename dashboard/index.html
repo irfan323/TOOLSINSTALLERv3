@@ -658,6 +658,25 @@ select.form-control option{background:var(--bg);}
           <div class="card-body" id="lapKabChart"></div>
         </div>
       </div>
+      <div class="chart-row">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="ct-dot" style="background:var(--amb);box-shadow:0 0 10px rgba(251,191,36,.4)"></span>Distribusi Tingkat Pendidikan</div>
+          </div>
+          <div class="card-body">
+            <div class="donut-wrap">
+              <svg viewBox="0 0 160 160" width="160" height="160" id="lapPendDonut"></svg>
+              <div class="donut-legend" id="lapPendLegend"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="ct-dot" style="background:var(--grn);box-shadow:0 0 10px rgba(16,185,129,.4)"></span>Jumlah Peserta per Pendidikan</div>
+          </div>
+          <div class="card-body" id="lapPendBar"></div>
+        </div>
+      </div>
     </div>
 
     <!-- ===== PAGE: IMPORT ===== -->
@@ -1303,6 +1322,32 @@ function renderLaporan(){
         <div class="bc-track"><div class="bc-fill" style="width:${v/maxK*100}%;background:${NEON[(i+5)%NEON.length]};box-shadow:0 0 8px ${NEON[(i+5)%NEON.length]}"></div></div>
         <div class="bc-val">${v}</div>
       </div>`).join('')
+  }</div>`;
+
+  // Pendidikan donut + bar
+  const pendMap={};
+  DB.forEach(d=>{ if(d.pendidikan) pendMap[d.pendidikan]=(pendMap[d.pendidikan]||0)+1; });
+  const pendSorted=Object.entries(pendMap).sort((a,b)=>b[1]-a[1]);
+  const totalPend=DB.filter(d=>d.pendidikan).length||1;
+  const pendColors=['#fbbf24','#00e5ff','#a855f7','#10b981','#ff2d78','#3b82f6','#f97316','#22d3ee','#ec4899','#8b5cf6'];
+
+  // Donut
+  const pendDonutItems=pendSorted.map((([k,v],i)=>({k,n:v,c:pendColors[i%pendColors.length]})));
+  renderDonut(pendDonutItems, totalPend, 'lapPendDonut', 'lapPendLegend');
+
+  // Bar
+  const maxPend=pendSorted[0]?.[1]||1;
+  document.getElementById('lapPendBar').innerHTML=`<div class="bar-chart">${
+    pendSorted.map(([k,v],i)=>{
+      const pct=Math.round(v/totalPend*100);
+      return `<div class="bc-item">
+        <div class="bc-label">${k}</div>
+        <div class="bc-track">
+          <div class="bc-fill" style="width:${v/maxPend*100}%;background:${pendColors[i%pendColors.length]};box-shadow:0 0 8px ${pendColors[i%pendColors.length]}"></div>
+        </div>
+        <div class="bc-val" style="min-width:52px;color:${pendColors[i%pendColors.length]}">${v} <span style="font-size:10px;opacity:.7">(${pct}%)</span></div>
+      </div>`;
+    }).join('')
   }</div>`;
 }
 
