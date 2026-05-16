@@ -1445,7 +1445,17 @@ function saveCfg(){
   toast('Pengaturan tersimpan','ok');
 }
 
-function save(){ localStorage.setItem(LS, JSON.stringify(DB)); document.getElementById('sbBadge').textContent = DB.length; }
+function save(){
+  localStorage.setItem(LS, JSON.stringify(DB));
+  document.getElementById('sbBadge').textContent = DB.length;
+  if(typeof cloudCfg!=='undefined'){
+    if(cloudCfg.provider==='firebase' && fbDbRef){
+      pushToFirebase().catch(e=>console.warn('Firebase push err:',e));
+    } else if(cloudCfg.provider==='supabase' && sbClient){
+      pushToSupabase().catch(e=>console.warn('Supabase push err:',e));
+    }
+  }
+}
 
 function populateFilters(){
   const progs = [...new Set(DB.map(d=>d.program).filter(Boolean))].sort();
@@ -2821,16 +2831,7 @@ function disconnectCloud(){
   toast('Koneksi cloud diputus','ok');
 }
 
-/* Override save() to also push to cloud */
-const _origSave = save;
-function save(){
-  _origSave();
-  if(cloudCfg.provider==='firebase' && fbDbRef){
-    pushToFirebase().catch(e=>console.warn('Firebase push err:',e));
-  } else if(cloudCfg.provider==='supabase' && sbClient){
-    pushToSupabase().catch(e=>console.warn('Supabase push err:',e));
-  }
-}
+/* save() sudah digabung di atas — tidak perlu override lagi */
 
 /* Restore cloud connection on page load */
 async function restoreCloudConnection(){
