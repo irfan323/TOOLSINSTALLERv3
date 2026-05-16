@@ -3037,7 +3037,7 @@ async function exportLaporanPDF(){
   if(!DB || DB.length===0){ toast('Data peserta kosong','err'); return; }
   // Pastikan halaman laporan aktif dan ter-render
   showPage('laporan');
-  await new Promise(r=>setTimeout(r,400));
+  await new Promise(r=>setTimeout(r,900));
   toast('Mengambil screenshot tampilan dashboard...','ok');
   try {
     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js','html2canvas-sdk');
@@ -3057,7 +3057,27 @@ async function exportLaporanPDF(){
         backgroundColor: '#0d0626',
         scale: 2,
         useCORS: true,
+        allowTaint: true,
         logging: false,
+        onclone: (clonedDoc) => {
+          // Resolve CSS variables — html2canvas tidak bisa baca var()
+          const s = clonedDoc.createElement('style');
+          s.textContent = `*, *::before, *::after {
+            --cyan:#00e5ff !important; --pink:#ff2d78 !important;
+            --pur:#a855f7 !important; --amb:#fbbf24 !important;
+            --grn:#10b981 !important; --red:#ff4d6a !important;
+            --bg:#0d0626 !important; --card:#130d2e !important;
+            --card2:#1a1040 !important; --brd:rgba(255,255,255,.08) !important;
+            --txt1:#f0f0ff !important; --txt2:#a0a0c0 !important;
+            --txt3:#606080 !important;
+            --glow-c:0 0 12px rgba(0,229,255,.5) !important;
+            --glow-p:0 0 12px rgba(255,45,120,.5) !important;
+            --glow-a:0 0 12px rgba(168,85,247,.5) !important;
+          }`;
+          clonedDoc.head.appendChild(s);
+          // Force background on body
+          clonedDoc.body.style.background = '#0d0626';
+        },
         ...opts
       });
       return canvas;
@@ -3121,7 +3141,7 @@ async function exportLaporanPDF(){
     // Sembunyikan tombol-tombol agar tidak ikut ter-screenshot
     const btns = laporanPage.querySelectorAll('button,.btn,.breadcrumb');
     btns.forEach(b=>b.style.visibility='hidden');
-    await new Promise(r=>setTimeout(r,200));
+    await new Promise(r=>setTimeout(r,500));
 
     const laporanCanvas = await captureEl(laporanPage, {windowWidth: laporanPage.scrollWidth});
     btns.forEach(b=>b.style.visibility='');
@@ -3131,11 +3151,11 @@ async function exportLaporanPDF(){
     // ── HALAMAN DAFTAR PESERTA (screenshot tabel peserta) ──
     showPage('peserta');
     // Reset filter agar tampil semua
-    await new Promise(r=>setTimeout(r,400));
+    await new Promise(r=>setTimeout(r,900));
     const pesertaPage = document.getElementById('page-peserta');
     const pesertaBtns = pesertaPage.querySelectorAll('button,.btn,.breadcrumb,.bulk-bar,.filter-bar');
     pesertaBtns.forEach(b=>b.style.visibility='hidden');
-    await new Promise(r=>setTimeout(r,200));
+    await new Promise(r=>setTimeout(r,500));
 
     const pesertaCanvas = await captureEl(pesertaPage, {windowWidth: pesertaPage.scrollWidth});
     pesertaBtns.forEach(b=>b.style.visibility='');
