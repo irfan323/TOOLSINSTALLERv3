@@ -3035,228 +3035,150 @@ function buildPdfContent(){
 
 async function exportLaporanPDF(){
   if(!DB || DB.length===0){ toast('Data peserta kosong','err'); return; }
-  toast('Menyiapkan PDF...','ok');
+  // Pastikan halaman laporan aktif dan ter-render
+  showPage('laporan');
+  await new Promise(r=>setTimeout(r,400));
+  toast('Mengambil screenshot tampilan dashboard...','ok');
   try {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js','html2canvas-sdk');
     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js','jspdf-sdk');
-    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js','jspdf-at-sdk');
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p','mm','a4');
-    const pw = doc.internal.pageSize.getWidth();
+    const pw = doc.internal.pageSize.getWidth();   // 210
+    const ph = doc.internal.pageSize.getHeight();  // 297
     const now = new Date();
     const tgl = now.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
-
-    // ── Hitung statistik ──
-    const total = DB.length;
-    const pvn   = DB.filter(d=>d.jenisPelatihan==='PVN').length;
-    const reg   = DB.filter(d=>d.jenisPelatihan==='REGULER').length;
-    const laki  = DB.filter(d=>d.gender==='Laki-laki').length;
-    const prm   = total - laki;
-    const lulus = DB.filter(d=>d.status==='Lulus').length;
-    const komp  = DB.filter(d=>d.status==='Kompeten').length;
-    const blm   = DB.filter(d=>d.status==='Belum Kompeten').length;
-
-    // ── Per program map ──
-    const progMap = {};
-    DB.forEach(d=>{
-      const p=d.program||d.bidangKeahlian||'–';
-      const k=d.kejuruan||'–';
-      const key=k+'|||'+p;
-      if(!progMap[key]) progMap[key]={k,p,n:0,l:0,pr:0,pvn:0,reg:0,lulus:0,komp:0,blm:0};
-      const r=progMap[key];
-      r.n++;
-      if(d.gender==='Laki-laki')r.l++;else r.pr++;
-      if(d.jenisPelatihan==='PVN')r.pvn++;else r.reg++;
-      if(d.status==='Lulus')r.lulus++;
-      else if(d.status==='Kompeten')r.komp++;
-      else if(d.status==='Belum Kompeten')r.blm++;
-    });
-    const progRows = Object.values(progMap).sort((a,b)=>b.n-a.n);
-
-    // ── KOP SURAT ──
-    doc.setFillColor(26,35,126);
-    doc.rect(0,0,pw,28,'F');
-    doc.setTextColor(255,255,255);
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(13);
-    doc.text('DINAS TENAGA KERJA', pw/2, 10, {align:'center'});
-    doc.setFontSize(11);
-    doc.text(CFG.instansi||'SATPEL PVP MAMUJU', pw/2, 17, {align:'center'});
-    doc.setFont('helvetica','normal');
-    doc.setFontSize(9);
-    doc.text(`LAPORAN NOMINATIF PESERTA PELATIHAN TAHUN ${CFG.tahun||now.getFullYear()}`, pw/2, 23, {align:'center'});
-
-    // Tanggal cetak
-    doc.setTextColor(100,100,100);
-    doc.setFontSize(8);
-    doc.text(`Dicetak: ${tgl}`, pw-15, 33, {align:'right'});
-
-    // ── RINGKASAN STATISTIK ──
-    let y = 37;
-    doc.setFillColor(240,242,255);
-    doc.rect(10, y, pw-20, 7, 'F');
-    doc.setTextColor(26,35,126);
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(9);
-    doc.text('RINGKASAN STATISTIK', 13, y+5);
-    y += 10;
-
-    const statW = (pw-20)/4;
-    const stats = [
-      {label:'Total Peserta', val:total, color:[26,35,126]},
-      {label:'PVN', val:pvn, color:[0,131,143]},
-      {label:'REGULER', val:reg, color:[230,81,0]},
-      {label:'Lulus/Kompeten', val:lulus+komp, color:[27,94,32]},
-    ];
-    stats.forEach((s,i)=>{
-      const x = 10 + i*statW;
-      doc.setDrawColor(200,200,200);
-      doc.setFillColor(255,255,255);
-      doc.roundedRect(x, y, statW-2, 14, 1,1,'FD');
-      doc.setTextColor(...s.color);
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(16);
-      doc.text(String(s.val), x+statW/2-1, y+9, {align:'center'});
-      doc.setFontSize(7);
-      doc.setTextColor(100,100,100);
-      doc.setFont('helvetica','normal');
-      doc.text(s.label, x+statW/2-1, y+13, {align:'center'});
-    });
-    y += 18;
-
-    const stats2 = [
-      {label:'Laki-laki', val:laki, color:[74,20,140]},
-      {label:'Perempuan', val:prm, color:[136,14,79]},
-      {label:'Lulus', val:lulus, color:[27,94,32]},
-      {label:'Belum Kompeten', val:blm, color:[191,54,12]},
-    ];
-    stats2.forEach((s,i)=>{
-      const x = 10 + i*statW;
-      doc.setDrawColor(200,200,200);
-      doc.setFillColor(255,255,255);
-      doc.roundedRect(x, y, statW-2, 14, 1,1,'FD');
-      doc.setTextColor(...s.color);
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(16);
-      doc.text(String(s.val), x+statW/2-1, y+9, {align:'center'});
-      doc.setFontSize(7);
-      doc.setTextColor(100,100,100);
-      doc.setFont('helvetica','normal');
-      doc.text(s.label, x+statW/2-1, y+13, {align:'center'});
-    });
-    y += 20;
-
-    // ── TABEL REKAPITULASI ──
-    doc.autoTable({
-      startY: y,
-      head:[['No','Kejuruan','Program Pelatihan','Jml','L','P','PVN','REG','Lulus','Komp','Blm']],
-      body: progRows.map((r,i)=>[i+1,r.k,r.p,r.n,r.l,r.pr,r.pvn,r.reg,r.lulus,r.komp,r.blm]),
-      foot:[['','','TOTAL',total,laki,prm,pvn,reg,lulus,komp,blm]],
-      styles:{fontSize:7, cellPadding:2},
-      headStyles:{fillColor:[26,35,126], textColor:255, fontStyle:'bold'},
-      footStyles:{fillColor:[232,234,246], textColor:[26,35,126], fontStyle:'bold'},
-      alternateRowStyles:{fillColor:[248,249,255]},
-      columnStyles:{0:{cellWidth:8},1:{cellWidth:30},2:{cellWidth:45},3:{cellWidth:10},4:{cellWidth:8},5:{cellWidth:8},6:{cellWidth:10},7:{cellWidth:10},8:{cellWidth:10},9:{cellWidth:10},10:{cellWidth:10}},
-      margin:{left:10,right:10},
-    });
-
-    // ── DAFTAR PESERTA ──
-    doc.addPage();
-    doc.setFillColor(26,35,126);
-    doc.rect(0,0,pw,12,'F');
-    doc.setTextColor(255,255,255);
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(10);
-    doc.text(`DAFTAR PESERTA — ${total} ORANG`, pw/2, 8, {align:'center'});
-
-    const peserta = [...DB].sort((a,b)=>(a.program||'').localeCompare(b.program||''));
-    doc.autoTable({
-      startY: 16,
-      head:[['No','Nama Peserta','NIK/NIP','L/P','Angkatan','Jenis','Program Pelatihan','Kab/Kota','Status']],
-      body: peserta.map((d,i)=>[
-        i+1,
-        d.nama||'–',
-        d.nip||'–',
-        d.gender==='Laki-laki'?'L':'P',
-        d.angkatan||'–',
-        d.jenisPelatihan||'–',
-        d.program||d.bidangKeahlian||'–',
-        d.instansi||'–',
-        d.status||'–',
-      ]),
-      styles:{fontSize:6.5, cellPadding:1.5},
-      headStyles:{fillColor:[26,35,126], textColor:255, fontStyle:'bold', fontSize:7},
-      alternateRowStyles:{fillColor:[248,249,255]},
-      columnStyles:{
-        0:{cellWidth:8},1:{cellWidth:38},2:{cellWidth:26},3:{cellWidth:8},
-        4:{cellWidth:16},5:{cellWidth:14},6:{cellWidth:38},7:{cellWidth:22},8:{cellWidth:18}
-      },
-      margin:{left:10,right:10},
-      didDrawPage:(data)=>{
-        // Footer tiap halaman
-        doc.setFontSize(7);
-        doc.setTextColor(150,150,150);
-        doc.text(`${CFG.instansi||'SATPEL PVP MAMUJU'} — Laporan Nominatif ${CFG.tahun||now.getFullYear()}`, 10, doc.internal.pageSize.getHeight()-5);
-        doc.text(`Hal. ${data.pageNumber}`, pw-10, doc.internal.pageSize.getHeight()-5, {align:'right'});
-      }
-    });
-
-    // ── TANDA TANGAN ──
-    const lastY = doc.lastAutoTable.finalY + 15;
-    doc.setFontSize(9);
-    doc.setTextColor(0,0,0);
-    doc.setFont('helvetica','normal');
-    const ttdY = Math.min(lastY, doc.internal.pageSize.getHeight()-50);
-    doc.text('Mengetahui,', 30, ttdY, {align:'center'});
-    doc.text('Kepala SATPEL PVP Mamuju', 30, ttdY+5, {align:'center'});
-    doc.text(CFG.kepala||'', 30, ttdY+30, {align:'center'});
-    doc.line(10, ttdY+29, 50, ttdY+29);
-    doc.text(`Mamuju, ${tgl}`, pw-30, ttdY, {align:'center'});
-    doc.text('Operator / Admin', pw-30, ttdY+5, {align:'center'});
-    doc.text(currentUserName||'', pw-30, ttdY+30, {align:'center'});
-    doc.line(pw-50, ttdY+29, pw-10, ttdY+29);
-
-    // ── SAVE ──
     const fname = `Laporan_Nominatif_${(CFG.instansi||'SATPEL').replace(/\s+/g,'_')}_${CFG.tahun||now.getFullYear()}.pdf`;
+
+    // ── Fungsi ambil screenshot satu elemen ──
+    async function captureEl(el, opts={}){
+      const canvas = await html2canvas(el, {
+        backgroundColor: '#0d0626',
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        ...opts
+      });
+      return canvas;
+    }
+
+    // ── Helper: tambah canvas ke PDF ──
+    function addCanvasToPdf(canvas, yStart=0, label=''){
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      const imgW = pw - 20;                        // margin kiri+kanan 10mm
+      const imgH = (canvas.height / canvas.width) * imgW;
+      // Jika tidak muat di halaman ini, tambah halaman baru
+      let y = yStart;
+      if(y + imgH > ph - 15){
+        doc.addPage();
+        y = 10;
+      }
+      if(label){
+        doc.setFillColor(13,6,38);
+        doc.rect(10, y, imgW, 6, 'F');
+        doc.setTextColor(0,229,255);
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(8);
+        doc.text(label, 13, y+4.5);
+        y += 7;
+      }
+      doc.addImage(imgData,'JPEG',10,y,imgW,imgH);
+      return y + imgH + 4;
+    }
+
+    // ── HALAMAN 1: Kop Header ──
+    doc.setFillColor(13,6,38);
+    doc.rect(0,0,pw,ph,'F');
+    // gradient bar top
+    doc.setFillColor(0,229,255);
+    doc.rect(0,0,pw,1.5,'F');
+    doc.setTextColor(0,229,255);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(14);
+    doc.text('LAPORAN NOMINATIF PESERTA', pw/2, 18, {align:'center'});
+    doc.setFontSize(10);
+    doc.setTextColor(168,85,247);
+    doc.text(CFG.instansi||'SATPEL PVP MAMUJU', pw/2, 25, {align:'center'});
+    doc.setFontSize(8);
+    doc.setTextColor(150,150,180);
+    doc.text(`Tahun ${CFG.tahun||now.getFullYear()}   •   Dicetak: ${tgl}   •   Oleh: ${currentUserName||'Admin'}`, pw/2, 31, {align:'center'});
+    doc.setDrawColor(0,229,255);
+    doc.setLineWidth(0.3);
+    doc.line(10,34,pw-10,34);
+
+    let curY = 38;
+
+    // ── Screenshot setiap section di halaman laporan ──
+    const sections = [
+      { id:'laporanBody',       label:'REKAPITULASI PER PROGRAM PELATIHAN', wrap:'table' },
+      { id:'lapGenderChart',    label:'GRAFIK GENDER PER PROGRAM' },
+      { id:'lapKabChart',       label:'GRAFIK PESERTA PER KABUPATEN/KOTA' },
+    ];
+
+    // Screenshot seluruh halaman laporan (semua card sekaligus)
+    const laporanPage = document.getElementById('page-laporan');
+    // Sembunyikan tombol-tombol agar tidak ikut ter-screenshot
+    const btns = laporanPage.querySelectorAll('button,.btn,.breadcrumb');
+    btns.forEach(b=>b.style.visibility='hidden');
+    await new Promise(r=>setTimeout(r,200));
+
+    const laporanCanvas = await captureEl(laporanPage, {windowWidth: laporanPage.scrollWidth});
+    btns.forEach(b=>b.style.visibility='');
+
+    curY = addCanvasToPdf(laporanCanvas, curY, 'LAPORAN REKAP & GRAFIK');
+
+    // ── HALAMAN DAFTAR PESERTA (screenshot tabel peserta) ──
+    showPage('peserta');
+    // Reset filter agar tampil semua
+    await new Promise(r=>setTimeout(r,400));
+    const pesertaPage = document.getElementById('page-peserta');
+    const pesertaBtns = pesertaPage.querySelectorAll('button,.btn,.breadcrumb,.bulk-bar,.filter-bar');
+    pesertaBtns.forEach(b=>b.style.visibility='hidden');
+    await new Promise(r=>setTimeout(r,200));
+
+    const pesertaCanvas = await captureEl(pesertaPage, {windowWidth: pesertaPage.scrollWidth});
+    pesertaBtns.forEach(b=>b.style.visibility='');
+
+    doc.addPage();
+    doc.setFillColor(13,6,38);
+    doc.rect(0,0,pw,ph,'F');
+    doc.setDrawColor(0,229,255);
+    doc.setLineWidth(0.3);
+    doc.line(10,5,pw-10,5);
+    addCanvasToPdf(pesertaCanvas, 8, `DAFTAR PESERTA — ${DB.length} ORANG`);
+
+    // ── Footer tiap halaman ──
+    const totalPages = doc.internal.getNumberOfPages();
+    for(let i=1;i<=totalPages;i++){
+      doc.setPage(i);
+      doc.setFillColor(13,6,38);
+      doc.rect(0,ph-8,pw,8,'F');
+      doc.setDrawColor(168,85,247);
+      doc.setLineWidth(0.3);
+      doc.line(10,ph-8,pw-10,ph-8);
+      doc.setFontSize(7);
+      doc.setTextColor(100,100,130);
+      doc.text(`${CFG.instansi||'SATPEL PVP MAMUJU'} — Nominatif ${CFG.tahun||now.getFullYear()}`, 12, ph-3);
+      doc.setTextColor(0,229,255);
+      doc.text(`${i} / ${totalPages}`, pw-12, ph-3, {align:'right'});
+    }
+
+    // Kembali ke halaman laporan
+    showPage('laporan');
     doc.save(fname);
     toast('PDF berhasil didownload!','ok');
   } catch(e){
+    showPage('laporan');
     toast('Gagal: '+e.message,'err');
     console.error(e);
   }
+
 }
 
 function printLaporan(){
-  // Build print content in new window
-  const content = buildPdfContent();
-  const w = window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html><head>
-    <title>Laporan Nominatif ${CFG.instansi||'SATPEL PVP MAMUJU'}</title>
-    <style>
-      body{font-family:'Segoe UI',Arial,sans-serif;font-size:11px;color:#000;margin:0;padding:15mm}
-      ${document.querySelector('style') ? '' : ''}
-      .pdf-kop{text-align:center;border-bottom:3px solid #1a237e;padding-bottom:10px;margin-bottom:14px}
-      .pdf-kop h1{font-size:15px;font-weight:800;color:#1a237e;margin:0 0 2px}
-      .pdf-kop h2{font-size:12px;font-weight:700;color:#333;margin:0 0 2px}
-      .pdf-kop p{font-size:10px;color:#555;margin:0}
-      .pdf-section-title{font-size:11px;font-weight:700;background:#1a237e;color:#fff;padding:5px 10px;margin:12px 0 6px}
-      .pdf-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
-      .pdf-stat-box{border:1px solid #ddd;border-radius:4px;padding:8px;text-align:center}
-      .pdf-stat-num{font-size:20px;font-weight:800;color:#1a237e}
-      .pdf-stat-lbl{font-size:9px;color:#666;margin-top:2px}
-      .pdf-table{width:100%;border-collapse:collapse;font-size:9px}
-      .pdf-table th{background:#1a237e;color:#fff;padding:4px 6px;text-align:left;border:1px solid #1a237e}
-      .pdf-table td{padding:4px 6px;border:1px solid #ddd}
-      .pdf-table tr:nth-child(even) td{background:#f5f5f5}
-      .pdf-table tfoot td{background:#e8eaf6;font-weight:700}
-      .pdf-footer{margin-top:10px;font-size:9px;color:#888;text-align:center;border-top:1px solid #ddd;padding-top:6px}
-      .pdf-bar{height:10px;background:#e8eaf6;border-radius:3px;margin-top:3px}
-      .pdf-bar-fill{height:100%;border-radius:3px;background:#1a237e}
-      @media print{body{padding:10mm}}
-    </style>
-  </head><body>${content}</body></html>`);
-  w.document.close();
-  setTimeout(()=>{ w.print(); }, 800);
+  // Cetak via screenshot tampilan dashboard
+  exportLaporanPDF();
 }
 
 </script>
