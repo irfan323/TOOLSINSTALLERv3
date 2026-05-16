@@ -451,7 +451,24 @@ select.form-control option{background:var(--bg);}
   .kartu-name,.kartu-prog,.ki-val{color:#000!important;}
   .ki-label{color:#666!important;}
 }
-</style>
+
+    /* ---- Cloud Sync ---- */
+    .cloud-status { display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:10px; background:rgba(0,229,255,.07); border:1px solid rgba(0,229,255,.2); margin-bottom:12px; }
+    .cloud-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    .cloud-dot.ok { background:var(--grn); box-shadow:0 0 8px var(--grn); animation:pulse 2s infinite; }
+    .cloud-dot.err { background:var(--red); }
+    .cloud-dot.idle { background:var(--txt3); }
+    .cloud-dot.conn { background:var(--amb); animation:pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .cloud-tabs { display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+    .cloud-tab { padding:6px 16px; border-radius:8px; border:1px solid rgba(255,255,255,.15); background:transparent; color:var(--txt2); cursor:pointer; font-size:13px; transition:.2s; }
+    .cloud-tab.active { background:var(--cyan); color:#000; border-color:var(--cyan); font-weight:600; }
+    .cloud-instr { background:rgba(255,255,255,.04); border-radius:8px; padding:12px 14px; font-size:12px; color:var(--txt3); line-height:1.8; margin-bottom:12px; }
+    .cloud-instr a { color:var(--cyan); }
+    .cloud-instr code { background:rgba(0,0,0,.4); padding:1px 5px; border-radius:4px; font-family:monospace; font-size:11px; color:var(--amb); }
+    .sync-badge { font-size:11px; padding:2px 8px; border-radius:10px; background:rgba(0,229,255,.15); color:var(--cyan); margin-left:auto; }
+
+    </style>
 </head>
 <body>
 
@@ -859,6 +876,94 @@ select.form-control option{background:var(--bg);}
           <button class="btn btn-cyan" onclick="saveCfg()">Simpan Pengaturan</button>
         </div>
       </div>
+
+      <div class="sett-section">
+        <div class="sett-title">☁️ Sinkronisasi Cloud & Akses Online</div>
+        
+        <div class="cloud-status" id="cloudStatusBar">
+          <span class="cloud-dot idle" id="cloudDot"></span>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:14px" id="cloudStatusText">Belum terhubung — menggunakan penyimpanan lokal</div>
+            <div style="font-size:11px;color:var(--txt3)" id="cloudStatusSub">Pilih provider cloud di bawah untuk mengaktifkan sinkronisasi realtime</div>
+          </div>
+          <span class="sync-badge" id="cloudSyncBadge" style="display:none">● LIVE</span>
+        </div>
+
+        <div class="cloud-tabs">
+          <button class="cloud-tab active" onclick="selectCloudTab('none')">🏠 Lokal</button>
+          <button class="cloud-tab" onclick="selectCloudTab('firebase')">🔥 Firebase</button>
+          <button class="cloud-tab" onclick="selectCloudTab('supabase')">⚡ Supabase</button>
+        </div>
+
+        <!-- LOKAL PANEL -->
+        <div id="cloudPanel-none">
+          <div class="cloud-instr">
+            Data disimpan di browser lokal (localStorage). Tidak perlu konfigurasi tambahan.<br>
+            <strong>URL Akses Online (GitHub Pages):</strong><br>
+            <a href="https://irfan323.github.io/TOOLSINSTALLERv3/dashboard/" target="_blank">
+              https://irfan323.github.io/TOOLSINSTALLERv3/dashboard/
+            </a>
+            <br><small>⚠️ Catatan: Setiap pengguna memiliki data lokal masing-masing. Untuk berbagi data secara realtime, pilih Firebase atau Supabase.</small>
+          </div>
+        </div>
+
+        <!-- FIREBASE PANEL -->
+        <div id="cloudPanel-firebase" style="display:none">
+          <div class="cloud-instr">
+            <strong>Cara setup Firebase (gratis):</strong><br>
+            1. Buka <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a><br>
+            2. Buat project baru → aktifkan <code>Realtime Database</code><br>
+            3. Set rules: <code>{ "rules": { ".read": true, ".write": true } }</code><br>
+            4. Salin konfigurasi project → paste di form bawah<br>
+            5. Klik <strong>Sambungkan Firebase</strong>
+          </div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">API Key</label>
+              <input class="form-control" id="fbApiKey" placeholder="AIzaSy..."/></div>
+            <div class="form-group"><label class="form-label">Auth Domain</label>
+              <input class="form-control" id="fbAuthDomain" placeholder="project.firebaseapp.com"/></div>
+            <div class="form-group full"><label class="form-label">Database URL</label>
+              <input class="form-control" id="fbDbUrl" placeholder="https://project-default-rtdb.firebaseio.com"/></div>
+            <div class="form-group"><label class="form-label">Project ID</label>
+              <input class="form-control" id="fbProjectId" placeholder="my-project-id"/></div>
+            <div class="form-group"><label class="form-label">Storage Bucket</label>
+              <input class="form-control" id="fbStorageBucket" placeholder="project.appspot.com"/></div>
+            <div class="form-group"><label class="form-label">Messaging Sender ID</label>
+              <input class="form-control" id="fbMsgSenderId" placeholder="123456789"/></div>
+            <div class="form-group full"><label class="form-label">App ID</label>
+              <input class="form-control" id="fbAppId" placeholder="1:123456:web:abc..."/></div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-cyan" onclick="connectFirebase()">🔥 Sambungkan Firebase</button>
+            <button class="btn btn-red" onclick="disconnectCloud()">Putuskan Koneksi</button>
+          </div>
+        </div>
+
+        <!-- SUPABASE PANEL -->
+        <div id="cloudPanel-supabase" style="display:none">
+          <div class="cloud-instr">
+            <strong>Cara setup Supabase (gratis):</strong><br>
+            1. Buka <a href="https://supabase.com" target="_blank">supabase.com</a> → buat project<br>
+            2. Buka <strong>SQL Editor</strong> → jalankan perintah ini:<br>
+            <code>create table peserta (id text primary key, data jsonb);</code><br>
+            <code>alter table peserta enable row level security;</code><br>
+            <code>create policy "public" on peserta for all using (true) with check (true);</code><br>
+            3. Di <strong>Project Settings → API</strong>: salin URL dan anon key<br>
+            4. Paste di form bawah → klik <strong>Sambungkan Supabase</strong>
+          </div>
+          <div class="form-grid">
+            <div class="form-group full"><label class="form-label">Project URL</label>
+              <input class="form-control" id="sbUrl" placeholder="https://xyzxyz.supabase.co"/></div>
+            <div class="form-group full"><label class="form-label">Anon / Public Key</label>
+              <input class="form-control" id="sbKey" placeholder="eyJhbGc..."/></div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-cyan" onclick="connectSupabase()">⚡ Sambungkan Supabase</button>
+            <button class="btn btn-red" onclick="disconnectCloud()">Putuskan Koneksi</button>
+          </div>
+        </div>
+      </div>
+
       <div class="sett-section">
         <div class="sett-title">Manajemen Data</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -1984,6 +2089,240 @@ function toast(msg, type='ok'){
 /* ========== START ========== */
 init();
 applyFilters();
+
+/* ============================================================
+   CLOUD SYNC — Firebase / Supabase
+   ============================================================ */
+
+const CLOUD_CFG_KEY = 'nominatif_cloud_cfg';
+let cloudCfg = JSON.parse(localStorage.getItem(CLOUD_CFG_KEY)||'null') || {provider:'none'};
+let fbApp = null, fbDbRef = null, fbUnsubscribe = null;
+let sbClient = null, sbChannel = null;
+let cloudSyncing = false;
+
+function selectCloudTab(tab){
+  document.querySelectorAll('.cloud-tab').forEach((b,i)=>{
+    const tabs=['none','firebase','supabase'];
+    b.classList.toggle('active', tabs[i]===tab);
+  });
+  ['none','firebase','supabase'].forEach(t=>{
+    const p=document.getElementById('cloudPanel-'+t);
+    if(p) p.style.display = t===tab ? '' : 'none';
+  });
+}
+
+function updateCloudStatus(state, text, sub){
+  const dot=document.getElementById('cloudDot');
+  const st=document.getElementById('cloudStatusText');
+  const sb2=document.getElementById('cloudStatusSub');
+  const badge=document.getElementById('cloudSyncBadge');
+  dot.className='cloud-dot '+state;
+  st.textContent=text;
+  if(sb2) sb2.textContent=sub||'';
+  badge.style.display = state==='ok' ? '' : 'none';
+}
+
+/* ---------- FIREBASE ---------- */
+function loadScript(src, id){
+  return new Promise((res,rej)=>{
+    if(document.getElementById(id)){res();return;}
+    const s=document.createElement('script');
+    s.src=src; s.id=id;
+    s.onload=res; s.onerror=rej;
+    document.head.appendChild(s);
+  });
+}
+
+async function connectFirebase(){
+  const cfg = {
+    apiKey: document.getElementById('fbApiKey').value.trim(),
+    authDomain: document.getElementById('fbAuthDomain').value.trim(),
+    databaseURL: document.getElementById('fbDbUrl').value.trim(),
+    projectId: document.getElementById('fbProjectId').value.trim(),
+    storageBucket: document.getElementById('fbStorageBucket').value.trim(),
+    messagingSenderId: document.getElementById('fbMsgSenderId').value.trim(),
+    appId: document.getElementById('fbAppId').value.trim(),
+  };
+  if(!cfg.apiKey||!cfg.databaseURL){ toast('Isi minimal API Key dan Database URL','err'); return; }
+  updateCloudStatus('conn','Menghubungkan ke Firebase...','Mohon tunggu');
+  try {
+    await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js','fb-app-sdk');
+    await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js','fb-db-sdk');
+    if(fbApp){ try{ fbApp.delete(); }catch(e){} }
+    fbApp = firebase.initializeApp(cfg, 'nominatif-'+Date.now());
+    const db = firebase.database(fbApp);
+    fbDbRef = db.ref('nominatif_peserta');
+    // Test connection
+    await fbDbRef.child('__ping').set(Date.now());
+    // Save config
+    cloudCfg = {provider:'firebase', firebase: cfg};
+    localStorage.setItem(CLOUD_CFG_KEY, JSON.stringify(cloudCfg));
+    // Push current DB to Firebase
+    await pushToFirebase();
+    // Subscribe to real-time updates
+    subscribeFirebase();
+    updateCloudStatus('ok','Firebase terhubung — sinkronisasi realtime aktif','Data disinkronkan secara realtime ke semua perangkat');
+    toast('Firebase berhasil terhubung! Data realtime aktif.','ok');
+  } catch(e) {
+    updateCloudStatus('err','Gagal terhubung ke Firebase',e.message);
+    toast('Gagal: '+e.message,'err');
+  }
+}
+
+async function pushToFirebase(){
+  if(!fbDbRef) return;
+  const obj = {};
+  DB.forEach(r=>{ obj[r.id.replace(/[.#$/\[\]]/g,'_')]=r; });
+  await fbDbRef.child('data').set(obj);
+  await fbDbRef.child('meta').set({updated:Date.now(), count:DB.length});
+}
+
+function subscribeFirebase(){
+  if(fbUnsubscribe){ fbUnsubscribe(); }
+  fbDbRef.child('data').on('value', snap=>{
+    const val = snap.val();
+    if(!val) return;
+    const incoming = Object.values(val);
+    if(incoming.length===0) return;
+    if(JSON.stringify(incoming.map(r=>r.id).sort()) !== JSON.stringify(DB.map(r=>r.id).sort())){
+      DB = incoming;
+      localStorage.setItem(LS, JSON.stringify(DB));
+      renderDashboard();
+      applyFilters();
+      document.getElementById('sbBadge').textContent = DB.length;
+      toast('Data diperbarui dari cloud','ok');
+    }
+  });
+  fbUnsubscribe = ()=>fbDbRef.child('data').off('value');
+}
+
+/* ---------- SUPABASE ---------- */
+async function connectSupabase(){
+  const url = document.getElementById('sbUrl').value.trim();
+  const key = document.getElementById('sbKey').value.trim();
+  if(!url||!key){ toast('Isi URL dan Key Supabase','err'); return; }
+  updateCloudStatus('conn','Menghubungkan ke Supabase...','Mohon tunggu');
+  try {
+    await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js','sb-sdk');
+    sbClient = supabase.createClient(url, key);
+    // Test connection
+    const { error } = await sbClient.from('peserta').select('id').limit(1);
+    if(error) throw new Error(error.message);
+    // Save config
+    cloudCfg = {provider:'supabase', supabase:{url,key}};
+    localStorage.setItem(CLOUD_CFG_KEY, JSON.stringify(cloudCfg));
+    // Push current DB
+    await pushToSupabase();
+    // Subscribe realtime
+    subscribeSupabase();
+    updateCloudStatus('ok','Supabase terhubung — sinkronisasi realtime aktif','Data disinkronkan secara realtime ke semua perangkat');
+    toast('Supabase berhasil terhubung! Data realtime aktif.','ok');
+  } catch(e) {
+    updateCloudStatus('err','Gagal terhubung ke Supabase',e.message);
+    toast('Gagal: '+e.message,'err');
+  }
+}
+
+async function pushToSupabase(){
+  if(!sbClient) return;
+  const rows = DB.map(r=>({id:r.id, data:r}));
+  await sbClient.from('peserta').upsert(rows, {onConflict:'id'});
+}
+
+function subscribeSupabase(){
+  if(sbChannel){ sbClient.removeChannel(sbChannel); }
+  sbChannel = sbClient.channel('peserta-changes')
+    .on('postgres_changes',{event:'*',schema:'public',table:'peserta'}, async ()=>{
+      const {data} = await sbClient.from('peserta').select('data');
+      if(!data||data.length===0) return;
+      DB = data.map(r=>r.data);
+      localStorage.setItem(LS, JSON.stringify(DB));
+      renderDashboard();
+      applyFilters();
+      document.getElementById('sbBadge').textContent = DB.length;
+      toast('Data diperbarui dari cloud','ok');
+    })
+    .subscribe();
+}
+
+/* ---------- DISCONNECT ---------- */
+function disconnectCloud(){
+  if(fbUnsubscribe){ fbUnsubscribe(); fbUnsubscribe=null; }
+  if(sbChannel && sbClient){ sbClient.removeChannel(sbChannel); sbChannel=null; }
+  if(fbApp){ try{fbApp.delete();}catch(e){} fbApp=null; fbDbRef=null; }
+  sbClient=null;
+  cloudCfg={provider:'none'};
+  localStorage.setItem(CLOUD_CFG_KEY, JSON.stringify(cloudCfg));
+  updateCloudStatus('idle','Terputus — menggunakan penyimpanan lokal','');
+  toast('Koneksi cloud diputus','ok');
+}
+
+/* Override save() to also push to cloud */
+const _origSave = save;
+function save(){
+  _origSave();
+  if(cloudCfg.provider==='firebase' && fbDbRef){
+    pushToFirebase().catch(e=>console.warn('Firebase push err:',e));
+  } else if(cloudCfg.provider==='supabase' && sbClient){
+    pushToSupabase().catch(e=>console.warn('Supabase push err:',e));
+  }
+}
+
+/* Restore cloud connection on page load */
+async function restoreCloudConnection(){
+  if(!cloudCfg || cloudCfg.provider==='none') return;
+  if(cloudCfg.provider==='firebase' && cloudCfg.firebase){
+    const f=cloudCfg.firebase;
+    document.getElementById('fbApiKey').value=f.apiKey||'';
+    document.getElementById('fbAuthDomain').value=f.authDomain||'';
+    document.getElementById('fbDbUrl').value=f.databaseURL||'';
+    document.getElementById('fbProjectId').value=f.projectId||'';
+    document.getElementById('fbStorageBucket').value=f.storageBucket||'';
+    document.getElementById('fbMsgSenderId').value=f.messagingSenderId||'';
+    document.getElementById('fbAppId').value=f.appId||'';
+    updateCloudStatus('conn','Menghubungkan ulang ke Firebase...','');
+    try {
+      await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js','fb-app-sdk');
+      await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js','fb-db-sdk');
+      fbApp = firebase.initializeApp(f, 'nominatif-restore');
+      fbDbRef = firebase.database(fbApp).ref('nominatif_peserta');
+      // Load data from Firebase
+      const snap = await fbDbRef.child('data').get();
+      if(snap.val()){
+        DB = Object.values(snap.val());
+        localStorage.setItem(LS, JSON.stringify(DB));
+        renderDashboard();
+        document.getElementById('sbBadge').textContent = DB.length;
+      }
+      subscribeFirebase();
+      selectCloudTab('firebase');
+      updateCloudStatus('ok','Firebase terhubung — sinkronisasi realtime aktif','');
+    } catch(e){ updateCloudStatus('err','Gagal menghubungkan kembali ke Firebase',e.message); }
+  } else if(cloudCfg.provider==='supabase' && cloudCfg.supabase){
+    const s=cloudCfg.supabase;
+    document.getElementById('sbUrl').value=s.url||'';
+    document.getElementById('sbKey').value=s.key||'';
+    updateCloudStatus('conn','Menghubungkan ulang ke Supabase...','');
+    try {
+      await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js','sb-sdk');
+      sbClient = supabase.createClient(s.url, s.key);
+      const {data} = await sbClient.from('peserta').select('data');
+      if(data && data.length>0){
+        DB = data.map(r=>r.data);
+        localStorage.setItem(LS, JSON.stringify(DB));
+        renderDashboard();
+        document.getElementById('sbBadge').textContent = DB.length;
+      }
+      subscribeSupabase();
+      selectCloudTab('supabase');
+      updateCloudStatus('ok','Supabase terhubung — sinkronisasi realtime aktif','');
+    } catch(e){ updateCloudStatus('err','Gagal menghubungkan kembali ke Supabase',e.message); }
+  }
+}
+
+/* Call after page load */
+window.addEventListener('load', ()=>{ setTimeout(restoreCloudConnection, 500); });
+
 </script>
 </body>
 </html>
