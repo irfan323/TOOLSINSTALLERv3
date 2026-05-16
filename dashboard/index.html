@@ -2095,7 +2095,16 @@ applyFilters();
    ============================================================ */
 
 const CLOUD_CFG_KEY = 'nominatif_cloud_cfg';
-let cloudCfg = JSON.parse(localStorage.getItem(CLOUD_CFG_KEY)||'null') || {provider:'none'};
+const DEFAULT_FIREBASE_CFG = {
+  apiKey: "AIzaSyBROi4JuRjfXmY7SNC9DLzc3OUQ7GrtxKM",
+  authDomain: "nominatif-satpel-pvp-mamuju.firebaseapp.com",
+  databaseURL: "https://nominatif-satpel-pvp-mamuju-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "nominatif-satpel-pvp-mamuju",
+  storageBucket: "nominatif-satpel-pvp-mamuju.firebasestorage.app",
+  messagingSenderId: "878383070504",
+  appId: "1:878383070504:web:8dad0da47f639c7ada241d",
+};
+let cloudCfg = JSON.parse(localStorage.getItem(CLOUD_CFG_KEY)||'null') || {provider:'firebase', firebase: DEFAULT_FIREBASE_CFG};
 let fbApp = null, fbDbRef = null, fbUnsubscribe = null;
 let sbClient = null, sbChannel = null;
 let cloudSyncing = false;
@@ -2288,15 +2297,20 @@ async function restoreCloudConnection(){
       fbDbRef = firebase.database(fbApp).ref('nominatif_peserta');
       // Load data from Firebase
       const snap = await fbDbRef.child('data').get();
-      if(snap.val()){
-        DB = Object.values(snap.val());
+      const fbData = snap.val();
+      if(fbData && Object.keys(fbData).length > 0){
+        DB = Object.values(fbData);
         localStorage.setItem(LS, JSON.stringify(DB));
         renderDashboard();
+        applyFilters();
         document.getElementById('sbBadge').textContent = DB.length;
+      } else {
+        // Firebase kosong — upload data lokal ke Firebase
+        await pushToFirebase();
       }
       subscribeFirebase();
       selectCloudTab('firebase');
-      updateCloudStatus('ok','Firebase terhubung — sinkronisasi realtime aktif','');
+      updateCloudStatus('ok','Firebase terhubung — sinkronisasi realtime aktif','Data tersinkron ke semua perangkat secara realtime');
     } catch(e){ updateCloudStatus('err','Gagal menghubungkan kembali ke Firebase',e.message); }
   } else if(cloudCfg.provider==='supabase' && cloudCfg.supabase){
     const s=cloudCfg.supabase;
@@ -2321,7 +2335,7 @@ async function restoreCloudConnection(){
 }
 
 /* Call after page load */
-window.addEventListener('load', ()=>{ setTimeout(restoreCloudConnection, 500); });
+window.addEventListener('load', ()=>{ setTimeout(restoreCloudConnection, 800); });
 
 </script>
 </body>
