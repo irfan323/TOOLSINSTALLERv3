@@ -468,9 +468,92 @@ select.form-control option{background:var(--bg);}
     .cloud-instr code { background:rgba(0,0,0,.4); padding:1px 5px; border-radius:4px; font-family:monospace; font-size:11px; color:var(--amb); }
     .sync-badge { font-size:11px; padding:2px 8px; border-radius:10px; background:rgba(0,229,255,.15); color:var(--cyan); margin-left:auto; }
 
+    
+    /* ===== LOGIN PAGE ===== */
+    #loginPage {
+      position:fixed; inset:0; z-index:9999;
+      background:var(--bg);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .login-box {
+      background:var(--card);
+      border:1px solid var(--brd);
+      border-radius:20px;
+      padding:40px 44px;
+      width:100%; max-width:420px;
+      box-shadow:0 0 60px rgba(0,229,255,.08), 0 0 120px rgba(168,85,247,.05);
+    }
+    .login-logo {
+      text-align:center; margin-bottom:28px;
+    }
+    .login-logo-icon {
+      width:64px; height:64px; border-radius:16px;
+      background:linear-gradient(135deg,var(--cyan),var(--pur));
+      display:inline-flex; align-items:center; justify-content:center;
+      margin-bottom:12px;
+    }
+    .login-logo-icon svg { width:34px; height:34px; fill:white; }
+    .login-title { font-size:20px; font-weight:700; color:var(--txt1); }
+    .login-sub { font-size:12px; color:var(--txt3); margin-top:4px; }
+    .login-field { margin-bottom:16px; }
+    .login-field label { display:block; font-size:12px; color:var(--txt2); margin-bottom:6px; }
+    .login-field input {
+      width:100%; padding:11px 14px; border-radius:10px;
+      background:rgba(255,255,255,.05); border:1px solid var(--brd);
+      color:var(--txt1); font-size:14px; outline:none; box-sizing:border-box;
+      transition:.2s;
+    }
+    .login-field input:focus { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(0,229,255,.1); }
+    .login-btn {
+      width:100%; padding:12px; border-radius:10px;
+      background:linear-gradient(135deg,var(--cyan),var(--pur));
+      color:#000; font-weight:700; font-size:15px;
+      border:none; cursor:pointer; margin-top:4px;
+      transition:.2s;
+    }
+    .login-btn:hover { opacity:.9; transform:translateY(-1px); }
+    .login-err { color:var(--red,#ff4d6a); font-size:12px; text-align:center; margin-top:10px; min-height:18px; }
+    .login-loading { text-align:center; color:var(--txt3); font-size:13px; margin-top:10px; }
+    /* ===== USER MANAGEMENT PAGE ===== */
+    .um-table { width:100%; border-collapse:collapse; }
+    .um-table th { background:rgba(0,229,255,.07); color:var(--txt2); font-size:12px; text-transform:uppercase; letter-spacing:.5px; padding:10px 14px; text-align:left; }
+    .um-table td { padding:10px 14px; border-bottom:1px solid var(--brd); color:var(--txt1); font-size:13px; }
+    .role-badge { display:inline-block; padding:3px 10px; border-radius:10px; font-size:11px; font-weight:600; }
+    .role-admin { background:rgba(255,45,120,.15); color:var(--pink); }
+    .role-operator { background:rgba(251,191,36,.15); color:var(--amb); }
+    .role-viewer { background:rgba(16,185,129,.15); color:var(--grn); }
+    /* ===== TOPBAR USER INFO ===== */
+    .tb-user-info { display:flex; align-items:center; gap:8px; cursor:default; }
+    .tb-user-name { font-size:12px; color:var(--txt2); max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .tb-user-role { font-size:10px; padding:1px 7px; border-radius:8px; font-weight:600; }
+
     </style>
 </head>
 <body>
+
+<!-- ===== LOGIN PAGE ===== -->
+<div id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 3a3 3 0 110 6 3 3 0 010-6zm5 12H7v-.5c0-2.5 2.24-4.5 5-4.5s5 2 5 4.5V18z"/></svg>
+      </div>
+      <div class="login-title">SATPEL PVP MAMUJU</div>
+      <div class="login-sub">Dashboard Nominatif Peserta — Silakan login</div>
+    </div>
+    <div class="login-field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="email@satpel.pvp" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <button class="login-btn" onclick="doLogin()">Masuk</button>
+    <div class="login-err" id="loginErr"></div>
+    <div class="login-loading" id="loginLoading" style="display:none">Menghubungkan...</div>
+  </div>
+</div>
 
 <!-- SIDEBAR -->
 <nav id="sidebar">
@@ -508,9 +591,13 @@ select.form-control option{background:var(--bg);}
       Per Angkatan
     </div>
     <div class="sb-section">Data</div>
-    <div class="sb-item" data-page="import">
+    <div class="sb-item edit-only" data-page="import">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
       Import Excel
+    </div>
+    <div class="sb-item admin-only" data-page="usermgr" style="display:none">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+      Kelola User
     </div>
     <div class="sb-item" data-page="pengaturan">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
@@ -520,6 +607,10 @@ select.form-control option{background:var(--bg);}
   <div class="sb-footer">
     <div><strong id="cfgInstansi">SATPEL PVP MAMUJU</strong></div>
     <div style="margin-top:2px">Tahun <span id="cfgTahun">2025</span></div>
+    <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+      <span id="sbUserName" style="font-size:11px;color:var(--txt2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+      <button onclick="doLogout()" title="Logout" style="background:rgba(255,45,120,.15);border:none;color:var(--pink);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px">Keluar</button>
+    </div>
   </div>
 </nav>
 
@@ -545,7 +636,7 @@ select.form-control option{background:var(--bg);}
       <div class="tb-icon" onclick="window.print()" title="Cetak">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
       </div>
-      <div class="tb-avatar" title="Admin">A</div>
+      <div class="tb-user-info"><span class="tb-user-name" id="tbUserName">-</span><span class="tb-user-role role-admin" id="tbUserRole">-</span><div class="tb-avatar" id="tbAvatar">A</div></div>
     </div>
   </header>
 
@@ -978,6 +1069,29 @@ select.form-control option{background:var(--bg);}
       <div class="sett-section">
         <div class="sett-title" style="color:var(--txt2)">Statistik Penyimpanan</div>
         <div id="storeStats" style="font-size:13px;color:var(--txt3);line-height:2"></div>
+      </div>
+    </div>
+
+
+    <!-- USER MANAGEMENT PAGE -->
+    <div id="page-usermgr" class="page" style="display:none">
+      <div class="breadcrumb"><a onclick="showPage('dashboard')">Home</a><span class="bc-sep">/</span><span>Kelola User</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+        <div style="font-size:18px;font-weight:700;color:var(--txt1)">Manajemen Pengguna</div>
+        <button class="btn btn-cyan" onclick="openAddUserModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Tambah User
+        </button>
+      </div>
+      <div class="table-wrap">
+        <table class="um-table">
+          <thead><tr>
+            <th>Nama</th><th>Email</th><th>Role</th><th>Dibuat</th><th>Aksi</th>
+          </tr></thead>
+          <tbody id="userListTbody">
+            <tr><td colspan="5" style="text-align:center;color:var(--txt3);padding:30px">Memuat...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -2090,6 +2204,273 @@ function toast(msg, type='ok'){
 init();
 applyFilters();
 
+
+/* ============================================================
+   AUTH — Firebase Authentication + Role-based Access Control
+   ============================================================ */
+
+const AUTH_DB_PATH = 'nominatif_users';
+let currentUser = null;   // Firebase auth user
+let currentRole = null;   // 'admin' | 'operator' | 'viewer'
+let currentUserName = '';
+let fbAuth = null;
+
+const ROLE_LABELS = {admin:'Admin', operator:'Operator', viewer:'Viewer'};
+const ROLE_CSS = {admin:'role-admin', operator:'role-operator', viewer:'role-viewer'};
+
+/* ---- Load Firebase Auth SDK and initialize ---- */
+async function initAuth(){
+  await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js','fb-app-sdk');
+  await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js','fb-auth-sdk');
+  await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js','fb-db-sdk');
+
+  const f = DEFAULT_FIREBASE_CFG;
+  if(!fbApp){
+    fbApp = firebase.initializeApp(f, 'nominatif-auth');
+  }
+  fbAuth = firebase.auth(fbApp);
+  fbDbRef = firebase.database(fbApp).ref('nominatif_peserta');
+
+  fbAuth.onAuthStateChanged(async user => {
+    if(user){
+      // Fetch role from database
+      const snap = await firebase.database(fbApp).ref(AUTH_DB_PATH+'/'+user.uid).get();
+      const udata = snap.val();
+      if(!udata){ doLogout(); return; } // user not in DB
+      currentUser = user;
+      currentRole = udata.role || 'viewer';
+      currentUserName = udata.nama || user.email;
+      afterLogin();
+    } else {
+      showLoginPage();
+    }
+  });
+}
+
+/* ---- Show/hide login page ---- */
+function showLoginPage(){
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('loginErr').textContent = '';
+  document.getElementById('loginLoading').style.display = 'none';
+  currentUser = null; currentRole = null;
+}
+
+function hideLoginPage(){
+  document.getElementById('loginPage').style.display = 'none';
+}
+
+/* ---- Login ---- */
+async function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginErr');
+  const loadEl = document.getElementById('loginLoading');
+  errEl.textContent = '';
+  if(!email||!pass){ errEl.textContent='Email dan password wajib diisi.'; return; }
+  loadEl.style.display='block';
+  try {
+    await fbAuth.signInWithEmailAndPassword(email, pass);
+    // onAuthStateChanged will handle the rest
+  } catch(e) {
+    loadEl.style.display='none';
+    const msgs = {
+      'auth/user-not-found':'Email tidak ditemukan.',
+      'auth/wrong-password':'Password salah.',
+      'auth/invalid-email':'Format email tidak valid.',
+      'auth/too-many-requests':'Terlalu banyak percobaan. Coba lagi nanti.',
+      'auth/invalid-credential':'Email atau password salah.',
+    };
+    errEl.textContent = msgs[e.code] || e.message;
+  }
+}
+
+/* ---- After login ---- */
+async function afterLogin(){
+  hideLoginPage();
+  applyRoleUI();
+  updateTopbarUser();
+  // Connect Firebase DB and load data
+  await connectFirebaseDB();
+}
+
+async function connectFirebaseDB(){
+  try {
+    const snap = await fbDbRef.child('data').get();
+    const fbData = snap.val();
+    if(fbData && Object.keys(fbData).length > 0){
+      DB = Object.values(fbData);
+      localStorage.setItem(LS, JSON.stringify(DB));
+    } else {
+      await pushToFirebase();
+    }
+    renderDashboard();
+    applyFilters();
+    document.getElementById('sbBadge').textContent = DB.length;
+    subscribeFirebase();
+    updateCloudStatus('ok','Firebase terhubung — realtime aktif','');
+    document.getElementById('cloudSyncBadge').style.display='';
+  } catch(e){
+    console.warn('Firebase DB error:', e.message);
+  }
+}
+
+/* ---- Logout ---- */
+async function doLogout(){
+  if(fbUnsubscribe){ fbUnsubscribe(); fbUnsubscribe=null; }
+  await fbAuth.signOut();
+  currentUser=null; currentRole=null; currentUserName='';
+}
+
+/* ---- Apply role-based UI ---- */
+function applyRoleUI(){
+  const role = currentRole;
+  // Admin-only elements
+  document.querySelectorAll('.admin-only').forEach(el=>{
+    el.style.display = role==='admin' ? '' : 'none';
+  });
+  // Operator+Admin can edit
+  const canEdit = role==='admin'||role==='operator';
+  document.querySelectorAll('.edit-only').forEach(el=>{
+    el.style.display = canEdit ? '' : 'none';
+  });
+  // Hide add/edit/delete buttons for viewer
+  if(!canEdit){
+    document.querySelectorAll('.btn-add-peserta,.btn-import,.btn-bulk,.btn-del').forEach(el=>el.style.display='none');
+  }
+  // Show user management page only for admin
+  const umItem = document.querySelector('.sb-item[data-page="usermgr"]');
+  if(umItem) umItem.style.display = role==='admin'?'':'none';
+}
+
+function updateTopbarUser(){
+  const nameEl = document.getElementById('tbUserName');
+  const roleEl = document.getElementById('tbUserRole');
+  const avatarEl = document.getElementById('tbAvatar');
+  const sbNameEl = document.getElementById('sbUserName');
+  if(nameEl) nameEl.textContent = currentUserName;
+  if(roleEl){
+    roleEl.textContent = ROLE_LABELS[currentRole]||currentRole;
+    roleEl.className = 'tb-user-role '+(ROLE_CSS[currentRole]||'');
+  }
+  if(avatarEl) avatarEl.textContent = (currentUserName||'?')[0].toUpperCase();
+  if(sbNameEl) sbNameEl.textContent = currentUserName + ' ('+( ROLE_LABELS[currentRole]||'')+ ')';
+}
+
+/* ============================================================
+   USER MANAGEMENT
+   ============================================================ */
+async function renderUserList(){
+  const tbody = document.getElementById('userListTbody');
+  tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--txt3);padding:20px">Memuat...</td></tr>';
+  try {
+    const snap = await firebase.database(fbApp).ref(AUTH_DB_PATH).get();
+    const users = snap.val();
+    if(!users||Object.keys(users).length===0){
+      tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--txt3);padding:20px">Belum ada user</td></tr>';
+      return;
+    }
+    tbody.innerHTML = Object.entries(users).map(([uid,u])=>`
+      <tr>
+        <td>${escHtml(u.nama||'-')}</td>
+        <td>${escHtml(u.email||'-')}</td>
+        <td><span class="role-badge ${ROLE_CSS[u.role]||''}">${ROLE_LABELS[u.role]||u.role}</span></td>
+        <td style="color:var(--txt3)">${u.created ? new Date(u.created).toLocaleDateString('id-ID') : '-'}</td>
+        <td>
+          ${uid!==currentUser.uid?`
+          <button class="btn btn-ghost" style="padding:4px 10px;font-size:12px" onclick="openEditUserModal('${uid}',${JSON.stringify(JSON.stringify(u))})">Edit</button>
+          <button class="btn btn-red" style="padding:4px 10px;font-size:12px;margin-left:4px" onclick="deleteUser('${uid}','${escHtml(u.email||'')}')">Hapus</button>
+          `:'<span style="color:var(--txt3);font-size:12px">(Akun Anda)</span>'}
+        </td>
+      </tr>
+    `).join('');
+  } catch(e){
+    tbody.innerHTML=`<tr><td colspan="5" style="color:var(--red);text-align:center;padding:20px">${e.message}</td></tr>`;
+  }
+}
+
+function openAddUserModal(){
+  document.getElementById('uEditUid').value='';
+  document.getElementById('uNama').value='';
+  document.getElementById('uEmail').value='';
+  document.getElementById('uPass').value='';
+  document.getElementById('uRole').value='operator';
+  document.getElementById('uPassGroup').style.display='';
+  document.getElementById('userModalTitle').textContent='Tambah User';
+  document.getElementById('userModalBd').style.display='flex';
+}
+
+function openEditUserModal(uid, jsonStr){
+  const u = JSON.parse(jsonStr);
+  document.getElementById('uEditUid').value=uid;
+  document.getElementById('uNama').value=u.nama||'';
+  document.getElementById('uEmail').value=u.email||'';
+  document.getElementById('uPass').value='';
+  document.getElementById('uRole').value=u.role||'viewer';
+  document.getElementById('uPassGroup').style.display='none'; // can't change pass here easily
+  document.getElementById('userModalTitle').textContent='Edit User';
+  document.getElementById('userModalBd').style.display='flex';
+}
+
+function closeUserModal(){
+  document.getElementById('userModalBd').style.display='none';
+}
+
+async function saveUser(){
+  const uid = document.getElementById('uEditUid').value;
+  const nama = document.getElementById('uNama').value.trim();
+  const email = document.getElementById('uEmail').value.trim();
+  const pass = document.getElementById('uPass').value;
+  const role = document.getElementById('uRole').value;
+  if(!nama||!email){ toast('Nama dan email wajib diisi','err'); return; }
+
+  if(!uid){
+    // Create new user via Firebase Auth REST API (requires admin SDK on server)
+    // Workaround: use secondary Firebase app to create user then sign back in
+    if(pass.length<6){ toast('Password minimal 6 karakter','err'); return; }
+    try {
+      // Save current user credential
+      const mainUser = fbAuth.currentUser;
+      // Create secondary auth instance
+      const secApp = firebase.initializeApp(DEFAULT_FIREBASE_CFG, 'sec-'+Date.now());
+      const secAuth = firebase.auth(secApp);
+      const cred = await secAuth.createUserWithEmailAndPassword(email, pass);
+      const newUid = cred.user.uid;
+      await secAuth.signOut();
+      await secApp.delete();
+      // Save user data in DB
+      await firebase.database(fbApp).ref(AUTH_DB_PATH+'/'+newUid).set({
+        nama, email, role, created: Date.now()
+      });
+      toast('User berhasil ditambahkan','ok');
+      closeUserModal();
+      renderUserList();
+    } catch(e){
+      const msgs={'auth/email-already-in-use':'Email sudah digunakan.','auth/weak-password':'Password terlalu lemah.'};
+      toast(msgs[e.code]||e.message,'err');
+    }
+  } else {
+    // Edit existing — only update role and nama in DB
+    try {
+      await firebase.database(fbApp).ref(AUTH_DB_PATH+'/'+uid).update({nama, role});
+      toast('User berhasil diperbarui','ok');
+      closeUserModal();
+      renderUserList();
+    } catch(e){ toast(e.message,'err'); }
+  }
+}
+
+async function deleteUser(uid, email){
+  if(!confirm('Hapus user '+email+'?')) return;
+  try {
+    await firebase.database(fbApp).ref(AUTH_DB_PATH+'/'+uid).remove();
+    toast('User dihapus','ok');
+    renderUserList();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+/* Override showPage to load user list when needed */
+const _origShowPage = typeof showPage === 'function' ? showPage : null;
+
 /* ============================================================
    CLOUD SYNC — Firebase / Supabase
    ============================================================ */
@@ -2335,8 +2716,67 @@ async function restoreCloudConnection(){
 }
 
 /* Call after page load */
-window.addEventListener('load', ()=>{ setTimeout(restoreCloudConnection, 800); });
+/* Firebase connection now handled by initAuth() */
+
+
+/* Wrap showPage to handle usermgr */
+(function(){
+  const orig = showPage;
+  showPage = function(id){
+    if(id==='usermgr' && currentRole!=='admin'){ toast('Akses ditolak','err'); return; }
+    orig(id);
+    if(id==='usermgr') renderUserList();
+    // Restrict import/pengaturan for viewer
+    if(currentRole==='viewer' && (id==='import'||id==='pengaturan')){
+      toast('Anda tidak memiliki akses ke halaman ini','err');
+      orig('dashboard');
+    }
+  };
+})();
+
+/* Start auth on load */
+window.addEventListener('DOMContentLoaded', ()=>{
+  initAuth().catch(e=>console.error('Auth init error:',e));
+});
 
 </script>
+
+<!-- MODAL TAMBAH/EDIT USER -->
+<div class="modal-bd" id="userModalBd" style="display:none">
+<div class="modal" style="max-width:420px">
+  <div class="modal-hdr">
+    <div class="modal-title" id="userModalTitle">Tambah User</div>
+    <button class="modal-x" onclick="closeUserModal()">×</button>
+  </div>
+  <div class="modal-body">
+    <input type="hidden" id="uEditUid"/>
+    <div class="form-group" style="margin-bottom:14px">
+      <label class="form-label">Nama Lengkap *</label>
+      <input class="form-control" id="uNama" placeholder="Nama pengguna"/>
+    </div>
+    <div class="form-group" style="margin-bottom:14px">
+      <label class="form-label">Email *</label>
+      <input class="form-control" id="uEmail" type="email" placeholder="email@satpel.pvp"/>
+    </div>
+    <div class="form-group" style="margin-bottom:14px" id="uPassGroup">
+      <label class="form-label">Password *</label>
+      <input class="form-control" id="uPass" type="password" placeholder="Min. 6 karakter"/>
+    </div>
+    <div class="form-group" style="margin-bottom:14px">
+      <label class="form-label">Role *</label>
+      <select class="form-control" id="uRole">
+        <option value="admin">Admin — Akses penuh</option>
+        <option value="operator">Operator — Input/edit peserta</option>
+        <option value="viewer">Viewer — Hanya lihat data</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-cyan" style="flex:1" onclick="saveUser()">Simpan</button>
+      <button class="btn btn-ghost" onclick="closeUserModal()">Batal</button>
+    </div>
+  </div>
+</div>
+</div>
+
 </body>
 </html>
