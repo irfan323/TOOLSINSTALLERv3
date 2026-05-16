@@ -527,6 +527,50 @@ select.form-control option{background:var(--bg);}
     .tb-user-name { font-size:12px; color:var(--txt2); max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .tb-user-role { font-size:10px; padding:1px 7px; border-radius:8px; font-weight:600; }
 
+    
+    /* ===== PRINT / PDF STYLES ===== */
+    @media print {
+      #sidebar, .topbar, .breadcrumb, .btn, button, #loginPage,
+      .modal-bd, #toast, .bulk-bar, .angkatan-filter { display:none!important; }
+      #main { margin:0!important; padding:0!important; }
+      #content { padding:0!important; }
+      body { background:#fff!important; color:#000!important; }
+      .page { display:block!important; }
+      .card { box-shadow:none!important; border:1px solid #ddd!important; background:#fff!important; break-inside:avoid; }
+      table { width:100%!important; }
+      th,td { color:#000!important; border:1px solid #ccc!important; }
+      .page:not(#page-laporan) { display:none!important; }
+      #page-laporan { display:block!important; }
+    }
+    /* PDF Report template */
+    #pdfReport {
+      position:fixed; left:-9999px; top:0;
+      width:210mm; background:#fff; color:#000;
+      font-family:'Segoe UI',Arial,sans-serif; font-size:11px;
+      padding:15mm 15mm 10mm 15mm; box-sizing:border-box;
+    }
+    .pdf-kop { text-align:center; border-bottom:3px solid #1a237e; padding-bottom:10px; margin-bottom:14px; }
+    .pdf-kop h1 { font-size:15px; font-weight:800; color:#1a237e; margin:0 0 2px; }
+    .pdf-kop h2 { font-size:12px; font-weight:700; color:#333; margin:0 0 2px; }
+    .pdf-kop p { font-size:10px; color:#555; margin:0; }
+    .pdf-section-title { font-size:11px; font-weight:700; background:#1a237e; color:#fff; padding:5px 10px; margin:12px 0 6px; }
+    .pdf-stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px; }
+    .pdf-stat-box { border:1px solid #ddd; border-radius:4px; padding:8px; text-align:center; }
+    .pdf-stat-num { font-size:20px; font-weight:800; color:#1a237e; }
+    .pdf-stat-lbl { font-size:9px; color:#666; margin-top:2px; }
+    .pdf-table { width:100%; border-collapse:collapse; font-size:9px; }
+    .pdf-table th { background:#1a237e; color:#fff; padding:4px 6px; text-align:left; border:1px solid #1a237e; }
+    .pdf-table td { padding:4px 6px; border:1px solid #ddd; }
+    .pdf-table tr:nth-child(even) td { background:#f5f5f5; }
+    .pdf-table tfoot td { background:#e8eaf6; font-weight:700; }
+    .pdf-footer { margin-top:10px; font-size:9px; color:#888; text-align:center; border-top:1px solid #ddd; padding-top:6px; }
+    .pdf-bar { height:10px; background:#e8eaf6; border-radius:3px; margin-top:3px; }
+    .pdf-bar-fill { height:100%; border-radius:3px; background:#1a237e; }
+    .pdf-prog-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .pdf-prog-item { border:1px solid #ddd; border-radius:4px; padding:8px; }
+    .pdf-prog-name { font-weight:700; font-size:10px; color:#1a237e; margin-bottom:4px; }
+    .pdf-prog-row { display:flex; justify-content:space-between; font-size:9px; color:#555; }
+
     </style>
 </head>
 <body>
@@ -812,7 +856,16 @@ select.form-control option{background:var(--bg);}
       <div class="card">
         <div class="card-header">
           <div class="card-title"><span class="ct-dot" style="background:var(--cyan);box-shadow:var(--glow-c)"></span>Rekapitulasi per Program</div>
-          <button class="btn btn-ghost btn-sm" onclick="window.print()">Cetak</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" onclick="exportLaporanPDF()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              Download PDF
+            </button>
+            <button class="btn btn-ghost btn-sm" onclick="printLaporan()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Cetak
+            </button>
+          </div>
         </div>
         <div class="tbl-wrap">
           <table>
@@ -2813,6 +2866,214 @@ window.addEventListener('DOMContentLoaded', ()=>{
   initAuth().catch(e=>console.error('Auth init error:',e));
 });
 
+
+/* ============================================================
+   PDF / PRINT REPORT
+   ============================================================ */
+
+function buildPdfContent(){
+  const now = new Date();
+  const tgl = now.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const jam = now.toLocaleTimeString('id-ID');
+
+  // Stats
+  const total = DB.length;
+  const pvn = DB.filter(d=>d.jenisPelatihan==='PVN').length;
+  const reg = DB.filter(d=>d.jenisPelatihan==='REGULER').length;
+  const laki = DB.filter(d=>d.gender==='Laki-laki').length;
+  const prm = DB.filter(d=>d.gender==='Perempuan').length;
+  const lulus = DB.filter(d=>d.status==='Lulus').length;
+  const kompeten = DB.filter(d=>d.status==='Kompeten').length;
+  const blm = DB.filter(d=>d.status==='Belum Kompeten').length;
+
+  // Per program map
+  const progMap = {};
+  DB.forEach(d=>{
+    const p = d.program||d.bidangKeahlian||'–';
+    const k = d.kejuruan||'–';
+    const key = k+'|||'+p;
+    if(!progMap[key]) progMap[key]={kejuruan:k,program:p,n:0,l:0,pr:0,pvn:0,reg:0,lulus:0,komp:0,blm:0};
+    const r=progMap[key];
+    r.n++;
+    if(d.gender==='Laki-laki')r.l++;else r.pr++;
+    if(d.jenisPelatihan==='PVN')r.pvn++;else r.reg++;
+    if(d.status==='Lulus')r.lulus++;
+    else if(d.status==='Kompeten')r.komp++;
+    else if(d.status==='Belum Kompeten')r.blm++;
+  });
+  const rows = Object.values(progMap).sort((a,b)=>b.n-a.n);
+
+  // Per kabupaten
+  const kabMap = {};
+  DB.forEach(d=>{ const k=d.instansi||'–'; kabMap[k]=(kabMap[k]||0)+1; });
+  const kabRows = Object.entries(kabMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const maxKab = Math.max(...kabRows.map(r=>r[1]));
+
+  // Daftar peserta (sorted by program)
+  const pesertaRows = [...DB].sort((a,b)=>(a.program||'').localeCompare(b.program||''));
+
+  return `
+    <div class="pdf-kop">
+      <h1>DINAS TENAGA KERJA</h1>
+      <h2>${escHtml(CFG.instansi||'SATPEL PVP MAMUJU')}</h2>
+      <p>LAPORAN NOMINATIF PESERTA PELATIHAN TAHUN ${CFG.tahun||new Date().getFullYear()}</p>
+      <p style="font-size:9px;color:#777;margin-top:4px">Dicetak: ${tgl}, ${jam}</p>
+    </div>
+
+    <div class="pdf-section-title">RINGKASAN STATISTIK</div>
+    <div class="pdf-stat-grid">
+      <div class="pdf-stat-box"><div class="pdf-stat-num" style="color:#1a237e">${total}</div><div class="pdf-stat-lbl">Total Peserta</div></div>
+      <div class="pdf-stat-box"><div class="pdf-stat-num" style="color:#00838f">${pvn}</div><div class="pdf-stat-lbl">Peserta PVN</div></div>
+      <div class="pdf-stat-box"><div class="pdf-stat-num" style="color:#e65100">${reg}</div><div class="pdf-stat-lbl">Peserta REGULER</div></div>
+      <div class="pdf-stat-box"><div class="pdf-stat-num" style="color:#2e7d32">${lulus+kompeten}</div><div class="pdf-stat-lbl">Lulus / Kompeten</div></div>
+    </div>
+    <div class="pdf-stat-grid">
+      <div class="pdf-stat-box"><div class="pdf-stat-num" style="color:#4a148c">${laki}</div><div class="pdf-stat-lbl">Laki-laki</div></div>
+      <div class="pdf-stat-box"><div class="pdf-stat-num" style="color:#880e4f">${prm}</div><div class="pdf-stat-lbl">Perempuan</div></div>
+      <div class="pdf-stat-box"><div class="pdf-stat-num" style="color:#1b5e20">${lulus}</div><div class="pdf-stat-lbl">Lulus</div></div>
+      <div class="pdf-stat-box"><div class="pdf-stat-num" style="color:#bf360c">${blm}</div><div class="pdf-stat-lbl">Belum Kompeten</div></div>
+    </div>
+
+    <div class="pdf-section-title">REKAPITULASI PER PROGRAM PELATIHAN</div>
+    <table class="pdf-table">
+      <thead><tr>
+        <th>No</th><th>Kejuruan</th><th>Program Pelatihan</th>
+        <th>Jml</th><th>L</th><th>P</th>
+        <th>PVN</th><th>REG</th><th>Lulus</th><th>Komp</th><th>Blm</th>
+      </tr></thead>
+      <tbody>
+        ${rows.map((r,i)=>`<tr>
+          <td>${i+1}</td>
+          <td>${escHtml(r.kejuruan)}</td>
+          <td>${escHtml(r.program)}</td>
+          <td><strong>${r.n}</strong></td>
+          <td>${r.l}</td><td>${r.pr}</td>
+          <td>${r.pvn}</td><td>${r.reg}</td>
+          <td>${r.lulus}</td><td>${r.komp}</td><td>${r.blm}</td>
+        </tr>`).join('')}
+      </tbody>
+      <tfoot><tr>
+        <td colspan="3"><strong>TOTAL</strong></td>
+        <td><strong>${total}</strong></td>
+        <td><strong>${laki}</strong></td><td><strong>${prm}</strong></td>
+        <td><strong>${pvn}</strong></td><td><strong>${reg}</strong></td>
+        <td><strong>${lulus}</strong></td><td><strong>${kompeten}</strong></td><td><strong>${blm}</strong></td>
+      </tr></tfoot>
+    </table>
+
+    <div class="pdf-section-title" style="margin-top:14px">DISTRIBUSI PER KABUPATEN/KOTA</div>
+    <table class="pdf-table" style="margin-bottom:14px">
+      <thead><tr><th>No</th><th>Kabupaten / Kota</th><th>Jumlah Peserta</th><th>Persentase</th></tr></thead>
+      <tbody>${kabRows.map((r,i)=>`<tr>
+        <td>${i+1}</td><td>${escHtml(r[0])}</td>
+        <td style="text-align:center"><strong>${r[1]}</strong></td>
+        <td>${total>0?(r[1]/total*100).toFixed(1):0}%
+          <div class="pdf-bar"><div class="pdf-bar-fill" style="width:${maxKab>0?r[1]/maxKab*100:0}%"></div></div>
+        </td>
+      </tr>`).join('')}</tbody>
+    </table>
+
+    <div class="pdf-section-title">DAFTAR PESERTA (${total} orang)</div>
+    <table class="pdf-table">
+      <thead><tr>
+        <th>No</th><th>Nama</th><th>NIK/NIP</th><th>L/P</th>
+        <th>Angkatan</th><th>Jenis</th><th>Program Pelatihan</th>
+        <th>Kabupaten</th><th>Status</th>
+      </tr></thead>
+      <tbody>${pesertaRows.map((d,i)=>`<tr>
+        <td>${i+1}</td>
+        <td>${escHtml(d.nama||'–')}</td>
+        <td style="font-size:8px">${escHtml(d.nip||'–')}</td>
+        <td>${d.gender==='Laki-laki'?'L':'P'}</td>
+        <td>${escHtml(d.angkatan||'–')}</td>
+        <td>${escHtml(d.jenisPelatihan||'–')}</td>
+        <td>${escHtml(d.program||d.bidangKeahlian||'–')}</td>
+        <td>${escHtml(d.instansi||'–')}</td>
+        <td>${escHtml(d.status||'–')}</td>
+      </tr>`).join('')}
+      </tbody>
+    </table>
+
+    <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div style="text-align:center">
+        <p style="font-size:10px">Mengetahui,</p>
+        <p style="font-size:10px">Kepala SATPEL PVP Mamuju</p>
+        <br/><br/><br/>
+        <p style="font-size:10px;border-top:1px solid #000;padding-top:4px">${escHtml(CFG.kepala||'_______________________')}</p>
+      </div>
+      <div style="text-align:center">
+        <p style="font-size:10px">Mamuju, ${now.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</p>
+        <p style="font-size:10px">Operator / Admin</p>
+        <br/><br/><br/>
+        <p style="font-size:10px;border-top:1px solid #000;padding-top:4px">${escHtml(currentUserName||'_______________________')}</p>
+      </div>
+    </div>
+
+    <div class="pdf-footer">
+      Dokumen ini digenerate otomatis oleh Sistem Nominatif SATPEL PVP MAMUJU &bull; ${tgl}
+    </div>
+  `;
+}
+
+async function exportLaporanPDF(){
+  toast('Menyiapkan PDF...','ok');
+  try {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js','html2pdf-sdk');
+    const el = document.getElementById('pdfReport');
+    el.innerHTML = buildPdfContent();
+    el.style.left = '0';
+    const fname = `Laporan_Nominatif_${CFG.instansi||'SATPEL'}_${CFG.tahun||new Date().getFullYear()}.pdf`;
+    const opt = {
+      margin: 0,
+      filename: fname,
+      image: {type:'jpeg', quality:0.95},
+      html2canvas: {scale:2, useCORS:true},
+      jsPDF: {unit:'mm', format:'a4', orientation:'portrait'},
+      pagebreak: {mode:['avoid-all','css','legacy']}
+    };
+    await html2pdf().set(opt).from(el).save();
+    el.style.left = '-9999px';
+    el.innerHTML = '';
+    toast('PDF berhasil didownload!','ok');
+  } catch(e) {
+    toast('Gagal generate PDF: '+e.message,'err');
+    console.error(e);
+  }
+}
+
+function printLaporan(){
+  // Build print content in new window
+  const content = buildPdfContent();
+  const w = window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head>
+    <title>Laporan Nominatif ${CFG.instansi||'SATPEL PVP MAMUJU'}</title>
+    <style>
+      body{font-family:'Segoe UI',Arial,sans-serif;font-size:11px;color:#000;margin:0;padding:15mm}
+      ${document.querySelector('style') ? '' : ''}
+      .pdf-kop{text-align:center;border-bottom:3px solid #1a237e;padding-bottom:10px;margin-bottom:14px}
+      .pdf-kop h1{font-size:15px;font-weight:800;color:#1a237e;margin:0 0 2px}
+      .pdf-kop h2{font-size:12px;font-weight:700;color:#333;margin:0 0 2px}
+      .pdf-kop p{font-size:10px;color:#555;margin:0}
+      .pdf-section-title{font-size:11px;font-weight:700;background:#1a237e;color:#fff;padding:5px 10px;margin:12px 0 6px}
+      .pdf-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+      .pdf-stat-box{border:1px solid #ddd;border-radius:4px;padding:8px;text-align:center}
+      .pdf-stat-num{font-size:20px;font-weight:800;color:#1a237e}
+      .pdf-stat-lbl{font-size:9px;color:#666;margin-top:2px}
+      .pdf-table{width:100%;border-collapse:collapse;font-size:9px}
+      .pdf-table th{background:#1a237e;color:#fff;padding:4px 6px;text-align:left;border:1px solid #1a237e}
+      .pdf-table td{padding:4px 6px;border:1px solid #ddd}
+      .pdf-table tr:nth-child(even) td{background:#f5f5f5}
+      .pdf-table tfoot td{background:#e8eaf6;font-weight:700}
+      .pdf-footer{margin-top:10px;font-size:9px;color:#888;text-align:center;border-top:1px solid #ddd;padding-top:6px}
+      .pdf-bar{height:10px;background:#e8eaf6;border-radius:3px;margin-top:3px}
+      .pdf-bar-fill{height:100%;border-radius:3px;background:#1a237e}
+      @media print{body{padding:10mm}}
+    </style>
+  </head><body>${content}</body></html>`);
+  w.document.close();
+  setTimeout(()=>{ w.print(); }, 800);
+}
+
 </script>
 
 <!-- MODAL TAMBAH/EDIT USER -->
@@ -2851,6 +3112,10 @@ window.addEventListener('DOMContentLoaded', ()=>{
   </div>
 </div>
 </div>
+
+
+<!-- PDF Report Template -->
+<div id="pdfReport"></div>
 
 </body>
 </html>
