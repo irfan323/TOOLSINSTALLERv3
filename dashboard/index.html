@@ -741,12 +741,12 @@ select.form-control option{background:var(--bg);}
           <div class="card-title"><span class="ct-dot" style="background:var(--amb);box-shadow:0 0 10px rgba(251,191,36,.4)"></span>Panduan Format Excel</div>
         </div>
         <div class="card-body">
-          <p style="font-size:13px;color:var(--txt2);margin-bottom:12px;">Kolom yang dikenali secara otomatis:</p>
+          <p style="font-size:13px;color:var(--txt2);margin-bottom:12px;">Kolom yang dikenali secara otomatis (urutan disarankan sesuai di bawah):</p>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;">
-            <span v-for="c in cols" style="font-size:12px;color:var(--cyan);background:rgba(0,229,255,.08);padding:4px 10px;border-radius:6px;border:1px solid rgba(0,229,255,.2);">nama</span>
+            <span style="font-size:12px;color:var(--cyan);background:rgba(0,229,255,.08);padding:4px 10px;border-radius:6px;border:1px solid rgba(0,229,255,.2);">nama</span>
             <span style="font-size:12px;color:var(--cyan);background:rgba(0,229,255,.08);padding:4px 10px;border-radius:6px;border:1px solid rgba(0,229,255,.2);">nik / nip</span>
             <span style="font-size:12px;color:var(--pur);background:rgba(168,85,247,.08);padding:4px 10px;border-radius:6px;border:1px solid rgba(168,85,247,.2);">jenis kelamin / gender / l/p</span>
-            <span style="font-size:12px;color:var(--pur);background:rgba(168,85,247,.08);padding:4px 10px;border-radius:6px;border:1px solid rgba(168,85,247,.2);">program / bidang keahlian</span>
+            <span style="font-size:12px;color:var(--pur);background:rgba(168,85,247,.08);padding:4px 10px;border-radius:6px;border:1px solid rgba(168,85,247,.2);">bidang keahlian</span>
             <span style="font-size:12px;color:var(--amb);background:rgba(251,191,36,.08);padding:4px 10px;border-radius:6px;border:1px solid rgba(251,191,36,.2);">instansi / kabupaten</span>
             <span style="font-size:12px;color:var(--amb);background:rgba(251,191,36,.08);padding:4px 10px;border-radius:6px;border:1px solid rgba(251,191,36,.2);">pendidikan / pend</span>
             <span style="font-size:12px;color:var(--grn);background:rgba(16,185,129,.08);padding:4px 10px;border-radius:6px;border:1px solid rgba(16,185,129,.2);">no hp / nomor hp / telp</span>
@@ -755,6 +755,10 @@ select.form-control option{background:var(--bg);}
             <span style="font-size:12px;color:var(--pink);background:rgba(255,45,120,.08);padding:4px 10px;border-radius:6px;border:1px solid rgba(255,45,120,.2);">tempat lahir / tpt lahir</span>
             <span style="font-size:12px;color:var(--txt2);background:rgba(255,255,255,.05);padding:4px 10px;border-radius:6px;border:1px solid var(--brd);">tanggal lahir / tgl lahir</span>
             <span style="font-size:12px;color:var(--txt2);background:rgba(255,255,255,.05);padding:4px 10px;border-radius:6px;border:1px solid var(--brd);">provinsi</span>
+            <span style="font-size:12px;color:var(--cyan);background:rgba(0,229,255,.08);padding:4px 10px;border-radius:6px;border:1px solid rgba(0,229,255,.2);">kejuruan</span>
+            <span style="font-size:12px;color:var(--amb);background:rgba(251,191,36,.08);padding:4px 10px;border-radius:6px;border:1px solid rgba(251,191,36,.2);">pvn / reguler / jenis pelatihan</span>
+            <span style="font-size:12px;color:var(--grn);background:rgba(16,185,129,.08);padding:4px 10px;border-radius:6px;border:1px solid rgba(16,185,129,.2);">kompeten</span>
+            <span style="font-size:12px;color:var(--pink);background:rgba(255,45,120,.08);padding:4px 10px;border-radius:6px;border:1px solid rgba(255,45,120,.2);">belum kompeten</span>
           </div>
         </div>
       </div>
@@ -1641,25 +1645,53 @@ function confirmImport(){
   let added=0;
   importRows.forEach((r,idx)=>{
     const keys=Object.keys(r);
+    // helper: find key containing substring k, return trimmed value
     const g=k=>{ const found=keys.find(h=>h.includes(k)); return found? String(r[found]).trim():''; };
+    // helper: find exact or close-match key
+    const gx=(...ks)=>{ for(const k of ks){ const v=g(k); if(v) return v; } return ''; };
+
     const nama=g('nama');
     if(!nama) return;
-    const genRaw=(g('jenis')||g('gender')||r[keys.find(k=>k==='l/p')||'']||'').toLowerCase();
+
+    // Gender
+    const genRaw=(gx('jenis kelamin','jenis','gender')||r[keys.find(k=>k==='l/p')||'']||'').toLowerCase();
     const gender=genRaw.startsWith('l')?'Laki-laki':'Perempuan';
+
+    // Jenis Pelatihan — kolom "pvn", "reguler", "jenis pelatihan", atau "jenis"
+    const jenisRaw=gx('pvn & reguler','jenis pelatihan','reguler','pvn').toUpperCase();
+    const jenisPelatihan=jenisRaw.includes('PVN')?'PVN':'REGULER';
+
+    // Status — kolom "kompeten" (nilai: kompeten/belum kompeten/lulus)
+    // atau kolom terpisah "belum kompeten"
+    const kompetenVal=gx('kompeten').toLowerCase();
+    const blmVal=gx('belum kompeten').toLowerCase();
+    let status='Kompeten';
+    if(blmVal && blmVal!=='0' && blmVal!=='-') status='Belum Kompeten';
+    else if(kompetenVal==='belum kompeten') status='Belum Kompeten';
+    else if(kompetenVal==='lulus') status='Lulus';
+    else if(kompetenVal && kompetenVal!=='0' && kompetenVal!=='-') status='Kompeten';
+
+    // Bidang Keahlian — kolom "bidang keahlian" atau "bidang"
+    const bidangKeahlian=gx('bidang keahlian','bidang');
+    // Kejuruan
+    const kejuruan=g('kejuruan');
+
     const obj={
       id:'imp'+Date.now()+idx,
-      nama, gender,
-      nip:g('nik')||g('nip')||g('no.'),
-      program:g('program')||g('bidang')||g('keahlian'),
-      instansi:g('kabupaten')||g('kota')||g('instansi'),
+      nama, gender, jenisPelatihan, status,
+      nip:gx('nik','nip','no.'),
+      bidangKeahlian,
+      kejuruan,
+      program:gx('program')||bidangKeahlian,
+      instansi:gx('kabupaten','kota','instansi'),
       provinsi:g('provinsi'),
-      pendidikan:g('pend'),
-      hp:g('hp')||g('telp'),
+      pendidikan:gx('pendidikan','pend'),
+      hp:gx('no hp','nomor hp','telp','hp'),
       email:g('email'),
       alamat:g('alamat'),
-      tempatLahir:g('tempat'),
-      tanggalLahir:g('lahir'),
-      jenisPelatihan:'REGULER', status:'Kompeten', catatan:'Import Excel'
+      tempatLahir:gx('tempat lahir','tpt lahir','tempat'),
+      tanggalLahir:gx('tanggal lahir','tgl lahir','lahir'),
+      catatan:'Import Excel'
     };
     DB.push(obj); added++;
   });
