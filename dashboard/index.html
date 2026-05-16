@@ -1516,6 +1516,14 @@ function populateFilters(){
   }
 }
 
+function getKejuruanFromBidang(bidang){
+  if(!bidang) return null;
+  for(const [kej, list] of Object.entries(BIDANG_BY_KEJURUAN)){
+    if(list.includes(bidang)) return kej;
+  }
+  return null;
+}
+
 function updateBidangOptions(kejuruan){
   const el = document.getElementById('fBidangKeahlian');
   if(!el) return;
@@ -1818,10 +1826,14 @@ function openModal(data=null){
   document.getElementById('fGender').value = data?.gender||'Laki-laki';
   // Set kejuruan → update bidang options → set bidang → sync fProgram
   const kej = document.getElementById('fKejuruanModal');
-  const initKej = data?.kejuruan || KEJURUAN_LIST[0];
+  // Jika data.kejuruan kosong, coba deteksi dari bidangKeahlian
+  const initKej = data?.kejuruan
+    || getKejuruanFromBidang(data?.bidangKeahlian)
+    || getKejuruanFromBidang(data?.program)
+    || KEJURUAN_LIST[0];
   if(kej){ kej.value = initKej; updateBidangOptions(initKej); }
   const bid = document.getElementById('fBidangKeahlian');
-  const initBid = data?.bidangKeahlian || (BIDANG_BY_KEJURUAN[initKej]||[])[0] || '';
+  const initBid = data?.bidangKeahlian || data?.program || (BIDANG_BY_KEJURUAN[initKej]||[])[0] || '';
   if(bid) bid.value = initBid;
   document.getElementById('fProgram').value = data?.program || initBid;
   document.getElementById('fInstansi').value = data?.instansi||'';
