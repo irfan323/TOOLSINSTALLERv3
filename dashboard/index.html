@@ -539,17 +539,46 @@ select.form-control option{background:var(--bg);}
         <svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 3a3 3 0 110 6 3 3 0 010-6zm5 12H7v-.5c0-2.5 2.24-4.5 5-4.5s5 2 5 4.5V18z"/></svg>
       </div>
       <div class="login-title">SATPEL PVP MAMUJU</div>
-      <div class="login-sub">Dashboard Nominatif Peserta — Silakan login</div>
+      <div class="login-sub" id="loginSubText">Dashboard Nominatif Peserta — Silakan login</div>
     </div>
-    <div class="login-field">
-      <label>Email</label>
-      <input type="email" id="loginEmail" placeholder="email@satpel.pvp" onkeydown="if(event.key==='Enter')doLogin()"/>
+
+    <!-- PANEL LOGIN -->
+    <div id="panelLogin">
+      <div class="login-field">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="email@satpel.pvp" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <div class="login-field">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <button class="login-btn" onclick="doLogin()">Masuk</button>
     </div>
-    <div class="login-field">
-      <label>Password</label>
-      <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+
+    <!-- PANEL SETUP ADMIN PERTAMA (muncul jika belum ada user) -->
+    <div id="panelSetup" style="display:none">
+      <div style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--amb);margin-bottom:16px;line-height:1.7">
+        ⚠️ Belum ada akun. Buat akun <strong>Admin</strong> pertama untuk memulai.
+      </div>
+      <div class="login-field">
+        <label>Nama Lengkap</label>
+        <input class="form-control" id="setupNama" placeholder="Nama Admin"/>
+      </div>
+      <div class="login-field">
+        <label>Email</label>
+        <input type="email" id="setupEmail" placeholder="email@satpel.pvp"/>
+      </div>
+      <div class="login-field">
+        <label>Password</label>
+        <input type="password" id="setupPass" placeholder="Min. 6 karakter"/>
+      </div>
+      <div class="login-field">
+        <label>Konfirmasi Password</label>
+        <input type="password" id="setupPass2" placeholder="Ulangi password"/>
+      </div>
+      <button class="login-btn" onclick="doSetupAdmin()">Buat Akun Admin</button>
     </div>
-    <button class="login-btn" onclick="doLogin()">Masuk</button>
+
     <div class="login-err" id="loginErr"></div>
     <div class="login-loading" id="loginLoading" style="display:none">Menghubungkan...</div>
   </div>
@@ -2242,17 +2271,30 @@ async function initAuth(){
       currentUserName = udata.nama || user.email;
       afterLogin();
     } else {
-      showLoginPage();
+      // Check if any users exist in DB (first-run detection)
+      try {
+        const usersSnap = await firebase.database(fbApp).ref(AUTH_DB_PATH).get();
+        const hasUsers = usersSnap.val() && Object.keys(usersSnap.val()).length > 0;
+        showLoginPage(!hasUsers);
+      } catch(e) {
+        showLoginPage(false);
+      }
     }
   });
 }
 
 /* ---- Show/hide login page ---- */
-function showLoginPage(){
+function showLoginPage(isFirstRun=false){
   document.getElementById('loginPage').style.display = 'flex';
   document.getElementById('loginErr').textContent = '';
   document.getElementById('loginLoading').style.display = 'none';
   currentUser = null; currentRole = null;
+  // Toggle panel
+  document.getElementById('panelLogin').style.display = isFirstRun ? 'none' : '';
+  document.getElementById('panelSetup').style.display = isFirstRun ? '' : 'none';
+  document.getElementById('loginSubText').textContent = isFirstRun
+    ? 'Setup Pertama — Buat akun Admin'
+    : 'Dashboard Nominatif Peserta — Silakan login';
 }
 
 function hideLoginPage(){
@@ -2281,6 +2323,38 @@ async function doLogin(){
       'auth/invalid-credential':'Email atau password salah.',
     };
     errEl.textContent = msgs[e.code] || e.message;
+  }
+}
+
+/* ---- Setup Admin Pertama ---- */
+async function doSetupAdmin(){
+  const nama  = document.getElementById('setupNama').value.trim();
+  const email = document.getElementById('setupEmail').value.trim();
+  const pass  = document.getElementById('setupPass').value;
+  const pass2 = document.getElementById('setupPass2').value;
+  const errEl = document.getElementById('loginErr');
+  const loadEl= document.getElementById('loginLoading');
+  errEl.textContent='';
+  if(!nama||!email||!pass){ errEl.textContent='Semua field wajib diisi.'; return; }
+  if(pass!==pass2){ errEl.textContent='Password tidak cocok.'; return; }
+  if(pass.length<6){ errEl.textContent='Password minimal 6 karakter.'; return; }
+  loadEl.style.display='block';
+  try {
+    const cred = await fbAuth.createUserWithEmailAndPassword(email, pass);
+    const uid = cred.user.uid;
+    await firebase.database(fbApp).ref(AUTH_DB_PATH+'/'+uid).set({
+      nama, email, role:'admin', created: Date.now()
+    });
+    // onAuthStateChanged will fire and call afterLogin
+    toast('Akun Admin berhasil dibuat!','ok');
+  } catch(e){
+    loadEl.style.display='none';
+    const msgs={
+      'auth/email-already-in-use':'Email sudah digunakan.',
+      'auth/weak-password':'Password terlalu lemah (min 6 karakter).',
+      'auth/invalid-email':'Format email tidak valid.',
+    };
+    errEl.textContent = msgs[e.code]||e.message;
   }
 }
 
