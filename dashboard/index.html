@@ -1222,7 +1222,7 @@ select.form-control option{background:var(--bg);}
       <!-- 4. Kejuruan (pilih dulu sebelum bidang keahlian) -->
       <div class="form-group"><label class="form-label">Kejuruan</label><select class="form-control" id="fKejuruanModal" onchange="updateBidangOptions(this.value)"></select></div>
       <!-- 5. Bidang Keahlian -->
-      <div class="form-group"><label class="form-label">Bidang Keahlian</label><select class="form-control" id="fBidangKeahlian"></select></div>
+      <div class="form-group"><label class="form-label">Bidang Keahlian</label><select class="form-control" id="fBidangKeahlian" onchange="document.getElementById('fProgram').value=this.value"></select></div>
       <!-- hidden: Program (auto-filled from bidang) -->
       <input type="hidden" id="fProgram"/>
       <!-- 6. Instansi / Kabupaten -->
@@ -1461,11 +1461,7 @@ function populateFilters(){
     el.appendChild(keep);
     progs.forEach(p=>{ const o=document.createElement('option'); o.value=o.textContent=p; el.appendChild(o); });
   });
-  const fp = document.getElementById('fProgram');
-  if(fp){
-    fp.innerHTML = '';
-    PROGRAMS.forEach(p=>{ const o=document.createElement('option'); o.value=o.textContent=p; fp.appendChild(o); });
-  }
+  // fProgram is now a hidden input — no options needed
   const fpend = document.getElementById('fPend');
   if(fpend){
     const keep = fpend.options[0];
@@ -1516,6 +1512,9 @@ function updateBidangOptions(kejuruan){
   const opts = BIDANG_BY_KEJURUAN[kejuruan]||[];
   el.innerHTML = '';
   opts.forEach(b=>{ const o=document.createElement('option'); o.value=o.textContent=b; el.appendChild(o); });
+  // sync fProgram hidden field with first option
+  const fp = document.getElementById('fProgram');
+  if(fp && opts.length) fp.value = opts[0];
 }
 
 function autoFillKejuruan(prog){
@@ -1807,13 +1806,14 @@ function openModal(data=null){
   document.getElementById('fNama').value = data?.nama||'';
   document.getElementById('fNip').value = data?.nip||'';
   document.getElementById('fGender').value = data?.gender||'Laki-laki';
-  document.getElementById('fProgram').value = data?.program||PROGRAMS[0];
-  const kMap = data? {kejuruan:data.kejuruan,bidangKeahlian:data.bidangKeahlian} : (PROGRAM_MAP[data?.program||PROGRAMS[0]]||{});
+  // Set kejuruan → update bidang options → set bidang → sync fProgram
   const kej = document.getElementById('fKejuruanModal');
-  if(kej){ kej.value = data?.kejuruan||KEJURUAN_LIST[0]; updateBidangOptions(kej.value); }
+  const initKej = data?.kejuruan || KEJURUAN_LIST[0];
+  if(kej){ kej.value = initKej; updateBidangOptions(initKej); }
   const bid = document.getElementById('fBidangKeahlian');
-  if(bid && data?.bidangKeahlian) bid.value = data.bidangKeahlian;
-  if(!data) autoFillKejuruan(PROGRAMS[0]);
+  const initBid = data?.bidangKeahlian || (BIDANG_BY_KEJURUAN[initKej]||[])[0] || '';
+  if(bid) bid.value = initBid;
+  document.getElementById('fProgram').value = data?.program || initBid;
   document.getElementById('fInstansi').value = data?.instansi||'';
   document.getElementById('fProvinsi').value = data?.provinsi||'Sulawesi Barat';
   document.getElementById('fPendidikan').value = data?.pendidikan||'SMA';
@@ -1834,9 +1834,10 @@ function savePeserta(){
   const nama = document.getElementById('fNama').value.trim();
   if(!nama){ toast('Nama harus diisi','err'); return; }
   const id = document.getElementById('editId').value || 'usr'+Date.now();
+  const bidangVal = document.getElementById('fBidangKeahlian').value;
   const obj={id,nama,nip:document.getElementById('fNip').value.trim(),
     gender:document.getElementById('fGender').value,
-    program:document.getElementById('fProgram').value,
+    program: bidangVal || document.getElementById('fProgram').value,
     jenisPelatihan:document.getElementById('fJenisPelatihan')?.value||'REGULER',
     angkatan:document.getElementById('fAngkatan')?.value||'Angkatan 1',
     kejuruan:document.getElementById('fKejuruanModal').value,
