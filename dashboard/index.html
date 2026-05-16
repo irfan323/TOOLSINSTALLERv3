@@ -1208,17 +1208,51 @@ select.form-control option{background:var(--bg);}
   <div class="modal-body">
     <input type="hidden" id="editId"/>
     <div class="form-grid">
-      <div class="form-group full"><label class="form-label">Nama Lengkap *</label><input class="form-control" id="fNama" placeholder="Nama peserta"/></div>
-      <div class="form-group"><label class="form-label">NIK / NIP</label><input class="form-control" id="fNip" placeholder="16 digit NIK"/></div>
-      <div class="form-group"><label class="form-label">Gender</label><select class="form-control" id="fGender"><option>Laki-laki</option><option>Perempuan</option></select></div>
-      <div class="form-group full"><label class="form-label">Program Pelatihan</label><select class="form-control" id="fProgram" onchange="autoFillKejuruan(this.value)"></select></div>
-      <div class="form-group"><label class="form-label">Kejuruan</label><select class="form-control" id="fKejuruanModal" onchange="updateBidangOptions(this.value)"></select></div>
-      <div class="form-group"><label class="form-label">Bidang Keahlian</label><select class="form-control" id="fBidangKeahlian"></select></div>
-      <div class="form-group"><label class="form-label">Kabupaten/Kota</label><input class="form-control" id="fInstansi" placeholder="Asal kabupaten"/></div>
-      <div class="form-group"><label class="form-label">Provinsi</label><input class="form-control" id="fProvinsi" value="Sulawesi Barat"/></div>
-      <div class="form-group"><label class="form-label">Jenis Pelatihan</label>
-        <select class="form-control" id="fJenisPelatihan"><option value="REGULER">REGULER</option><option value="PVN">PVN</option></select>
+      <!-- 1. Nama -->
+      <div class="form-group full"><label class="form-label">Nama *</label><input class="form-control" id="fNama" placeholder="Nama lengkap peserta"/></div>
+      <!-- 2. NIK / NIP -->
+      <div class="form-group"><label class="form-label">NIK / NIP</label><input class="form-control" id="fNip" placeholder="16 digit NIK atau NIP"/></div>
+      <!-- 3. Jenis Kelamin -->
+      <div class="form-group"><label class="form-label">Jenis Kelamin</label>
+        <select class="form-control" id="fGender">
+          <option value="Laki-laki">L — Laki-laki</option>
+          <option value="Perempuan">P — Perempuan</option>
+        </select>
       </div>
+      <!-- 4. Kejuruan (pilih dulu sebelum bidang keahlian) -->
+      <div class="form-group"><label class="form-label">Kejuruan</label><select class="form-control" id="fKejuruanModal" onchange="updateBidangOptions(this.value)"></select></div>
+      <!-- 5. Bidang Keahlian -->
+      <div class="form-group"><label class="form-label">Bidang Keahlian</label><select class="form-control" id="fBidangKeahlian"></select></div>
+      <!-- hidden: Program (auto-filled from bidang) -->
+      <input type="hidden" id="fProgram"/>
+      <!-- 6. Instansi / Kabupaten -->
+      <div class="form-group"><label class="form-label">Instansi / Kabupaten</label><input class="form-control" id="fInstansi" placeholder="Kab/Kota asal"/></div>
+      <!-- 7. Pendidikan -->
+      <div class="form-group"><label class="form-label">Pendidikan</label>
+        <select class="form-control" id="fPendidikan">
+          <option>SD</option><option>SMP</option><option>SMA</option><option>SMK</option>
+          <option>D.1</option><option>D.2</option><option>D.3</option><option>D.4</option>
+          <option>S.1</option><option>S.2</option><option>S.3</option>
+        </select>
+      </div>
+      <!-- 8. No HP -->
+      <div class="form-group"><label class="form-label">No. HP / Telp</label><input class="form-control" id="fHp" placeholder="08xxxxxxxxxx"/></div>
+      <!-- 9. Email -->
+      <div class="form-group"><label class="form-label">Email</label><input class="form-control" id="fEmail" placeholder="email@domain.com"/></div>
+      <!-- 10. Alamat -->
+      <div class="form-group full"><label class="form-label">Alamat</label><textarea class="form-control" id="fAlamat" rows="2" style="resize:vertical" placeholder="Alamat lengkap"></textarea></div>
+      <!-- 11. Tempat Lahir -->
+      <div class="form-group"><label class="form-label">Tempat Lahir</label><input class="form-control" id="fTempatLahir" placeholder="Kota tempat lahir"/></div>
+      <!-- 12. Provinsi -->
+      <div class="form-group"><label class="form-label">Provinsi</label><input class="form-control" id="fProvinsi" value="Sulawesi Barat"/></div>
+      <!-- 13. Jenis Pelatihan: PVN / REGULER -->
+      <div class="form-group"><label class="form-label">Jenis Pelatihan (PVN / REGULER)</label>
+        <select class="form-control" id="fJenisPelatihan">
+          <option value="REGULER">REGULER</option>
+          <option value="PVN">PVN</option>
+        </select>
+      </div>
+      <!-- Angkatan -->
       <div class="form-group"><label class="form-label">Angkatan</label>
         <select class="form-control" id="fAngkatan">
           <option value="Angkatan 1">Angkatan 1</option>
@@ -1229,24 +1263,18 @@ select.form-control option{background:var(--bg);}
           <option value="Angkatan 6">Angkatan 6</option>
         </select>
       </div>
-      <div class="form-group"><label class="form-label">Pendidikan</label>
-        <select class="form-control" id="fPendidikan">
-          <option>SD</option><option>SMP</option><option>SMA</option><option>SMK</option>
-          <option>D.1</option><option>D.2</option><option>D.3</option><option>D.4</option>
-          <option>S.1</option><option>S.2</option><option>S.3</option>
-        </select>
-      </div>
-      <div class="form-group"><label class="form-label">Status</label>
+      <!-- 14. Status: Kompeten / Belum Kompeten -->
+      <div class="form-group"><label class="form-label">Status Kompetensi</label>
         <select class="form-control" id="fStatus">
-          <option>Lulus</option><option>Kompeten</option><option>Belum Kompeten</option>
+          <option value="Lulus">Lulus</option>
+          <option value="Kompeten">Kompeten</option>
+          <option value="Belum Kompeten">Belum Kompeten</option>
         </select>
       </div>
-      <div class="form-group"><label class="form-label">Tempat Lahir</label><input class="form-control" id="fTempatLahir" placeholder="Kota lahir"/></div>
-      <div class="form-group"><label class="form-label">Tanggal Lahir</label><input type="date" class="form-control" id="fTanggalLahir"/></div>
-      <div class="form-group"><label class="form-label">No. HP</label><input class="form-control" id="fHp" placeholder="08xx"/></div>
-      <div class="form-group"><label class="form-label">Email</label><input class="form-control" id="fEmail" placeholder="email@domain.com"/></div>
-      <div class="form-group full"><label class="form-label">Alamat</label><textarea class="form-control" id="fAlamat" rows="2" style="resize:vertical" placeholder="Alamat lengkap"></textarea></div>
-      <div class="form-group full"><label class="form-label">Catatan</label><input class="form-control" id="fCatatan" placeholder="Catatan opsional"/></div>
+      <!-- Tanggal Lahir (opsional) -->
+      <div class="form-group"><label class="form-label">Tanggal Lahir <span style="color:var(--txt3);font-size:10px">(opsional)</span></label><input type="date" class="form-control" id="fTanggalLahir"/></div>
+      <!-- Catatan -->
+      <div class="form-group full"><label class="form-label">Catatan <span style="color:var(--txt3);font-size:10px">(opsional)</span></label><input class="form-control" id="fCatatan" placeholder="Catatan tambahan"/></div>
     </div>
   </div>
   <div class="modal-ftr">
