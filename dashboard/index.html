@@ -625,6 +625,9 @@ select.form-control option{background:var(--bg);}
 
     <div class="login-err" id="loginErr"></div>
     <div class="login-loading" id="loginLoading" style="display:none">Menghubungkan...</div>
+    <div style="margin-top:20px;text-align:center;font-size:11px;color:rgba(255,255,255,.25)">
+      Dibuat oleh <strong style="color:rgba(0,229,255,.5)">Irfan</strong>
+    </div>
   </div>
 </div>
 
@@ -683,6 +686,9 @@ select.form-control option{background:var(--bg);}
     <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
       <span id="sbUserName" style="font-size:11px;color:var(--txt2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
       <button onclick="doLogout()" title="Logout" style="background:rgba(255,45,120,.15);border:none;color:var(--pink);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px">Keluar</button>
+    </div>
+    <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--brd);font-size:10px;color:var(--txt3)">
+      Dibuat oleh <strong style="color:var(--cyan)">Irfan</strong>
     </div>
   </div>
 </nav>
@@ -1151,6 +1157,18 @@ select.form-control option{background:var(--bg);}
       <div class="sett-section">
         <div class="sett-title" style="color:var(--txt2)">Statistik Penyimpanan</div>
         <div id="storeStats" style="font-size:13px;color:var(--txt3);line-height:2"></div>
+      </div>
+      <div class="sett-section" style="border:1px solid rgba(0,229,255,.15);background:rgba(0,229,255,.03)">
+        <div class="sett-title" style="color:var(--cyan)">Tentang Aplikasi</div>
+        <div style="font-size:13px;color:var(--txt2);line-height:2">
+          <div>Nama Aplikasi: <strong style="color:var(--txt1)">Dashboard Nominatif Peserta</strong></div>
+          <div>Instansi: <strong style="color:var(--txt1)">SATPEL PVP MAMUJU</strong></div>
+          <div>Versi: <strong style="color:var(--cyan)">2.0.0</strong></div>
+          <div>Pembuat: <strong style="color:var(--cyan)">Irfan</strong></div>
+          <div style="margin-top:8px;font-size:11px;color:var(--txt3)">
+            Sistem informasi manajemen peserta pelatihan berbasis web dengan sinkronisasi realtime Firebase.
+          </div>
+        </div>
       </div>
     </div>
 
