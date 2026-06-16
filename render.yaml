@@ -1,0 +1,16 @@
+# Blueprint Render.com — deploy otomatis aplikasi SPJ BOS Otomatis.
+# Cara pakai: di dashboard Render pilih "New +" -> "Blueprint",
+# hubungkan repo ini, Render membaca berkas ini dan membuat layanannya.
+services:
+  - type: web
+    name: spj-bos-otomatis
+    runtime: docker
+    dockerfilePath: ./app/Dockerfile
+    dockerContext: ./app
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "0"

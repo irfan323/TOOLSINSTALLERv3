@@ -24,7 +24,7 @@ UPLOAD_DIR = os.path.join(BASE_DIR, "static", "uploads")
 SAMPLE_DB = os.path.join(BASE_DIR, "data", "sample_arcas.db")
 
 app = Flask(__name__)
-app.secret_key = "spj-bos-arcas-secret"
+app.secret_key = os.environ.get("SECRET_KEY", "spj-bos-arcas-secret")
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # 8 MB untuk logo
 
 DOC_TYPES = {
@@ -398,4 +398,7 @@ SMART_ARCAS_GUIDE = [
 
 if __name__ == "__main__":
     os.makedirs(os.path.join(BASE_DIR, "data"), exist_ok=True)
-    app.run(host="127.0.0.1", port=5000, debug=True, threaded=True)
+    port = int(os.environ.get("PORT", 5000))
+    host = os.environ.get("HOST", "127.0.0.1")
+    debug = os.environ.get("DEBUG", "1") == "1"
+    app.run(host=host, port=port, debug=debug, threaded=True)
