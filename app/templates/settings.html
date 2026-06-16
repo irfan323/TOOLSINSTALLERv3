@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Pengaturan &amp; Personalisasi</h1>
+<p class="subtitle">Identitas sekolah, logo, tim pemeriksa, dan koneksi database Arcas.</p>
+
+<form method="post" enctype="multipart/form-data">
+  <div class="panel">
+    <h2>Koneksi Database Arcas</h2>
+    <label>Path Database Arcas (SQLite .db)</label>
+    <input name="arcas_db_path" value="{{ settings.arcas_db_path }}" placeholder="/path/ke/arcas.db">
+    <p class="hint">Arcas menyimpan data pada SQLite lokal. Belum punya? Buat data contoh:</p>
+    <button class="btn sm gray" formaction="{{ url_for('sync_sample') }}" formmethod="post" formnovalidate>
+      Buat Database Contoh ({{ sample_db }})
+    </button>
+  </div>
+
+  <div class="panel">
+    <h2>Identitas Pemerintah Daerah &amp; Sekolah</h2>
+    <div class="row">
+      <div><label>Nama Pemerintah Daerah</label><input name="nama_pemda" value="{{ settings.nama_pemda }}"></div>
+      <div><label>Nama Dinas</label><input name="nama_dinas" value="{{ settings.nama_dinas }}"></div>
+    </div>
+    <div class="row">
+      <div style="flex:2"><label>Satuan Pendidikan</label><input name="satuan_pendidikan" value="{{ settings.satuan_pendidikan }}"></div>
+      <div><label>NPSN</label><input name="npsn" value="{{ settings.npsn }}"></div>
+    </div>
+    <label>Alamat Sekolah</label><input name="alamat_sekolah" value="{{ settings.alamat_sekolah }}">
+    <div class="row">
+      <div><label>Desa/Kelurahan</label><input name="desa" value="{{ settings.desa }}"></div>
+      <div><label>Kecamatan</label><input name="kecamatan" value="{{ settings.kecamatan }}"></div>
+      <div><label>Kabupaten/Kota</label><input name="kabupaten" value="{{ settings.kabupaten }}"></div>
+      <div><label>Provinsi</label><input name="provinsi" value="{{ settings.provinsi }}"></div>
+    </div>
+    <div class="row">
+      <div><label>Tahun Anggaran</label>
+        <select name="tahun_anggaran">
+          {% for y in [2024,2025,2026] %}<option value="{{ y }}" {{ 'selected' if y==settings.tahun_anggaran }}>{{ y }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Pejabat Penanda Tangan</h2>
+    <div class="row">
+      <div><label>Kepala Sekolah</label><input name="kepala_sekolah" value="{{ settings.kepala_sekolah }}"></div>
+      <div><label>NIP Kepala Sekolah</label><input name="nip_kepala" value="{{ settings.nip_kepala }}"></div>
+    </div>
+    <div class="row">
+      <div><label>Bendahara BOS</label><input name="bendahara" value="{{ settings.bendahara }}"></div>
+      <div><label>NIP Bendahara</label><input name="nip_bendahara" value="{{ settings.nip_bendahara }}"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Logo Dokumen</h2>
+    <div class="row">
+      <div>
+        <label>Logo Pemerintah Daerah</label>
+        <input type="file" name="logo_pemda" accept="image/*">
+        {% if logo_pemda_uri %}<div style="margin-top:8px"><img src="{{ logo_pemda_uri }}" style="height:60px;background:#fff;padding:4px;border-radius:6px"></div>{% endif %}
+      </div>
+      <div>
+        <label>Logo Sekolah</label>
+        <input type="file" name="logo_sekolah" accept="image/*">
+        {% if logo_sekolah_uri %}<div style="margin-top:8px"><img src="{{ logo_sekolah_uri }}" style="height:60px;background:#fff;padding:4px;border-radius:6px"></div>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Tim Pemeriksa Barang</h2>
+    <div id="tim">
+      {% for t in settings.tim_pemeriksa %}
+      <div class="repeater-row">
+        <input name="tp_nama" placeholder="Nama" value="{{ t.nama }}">
+        <input name="tp_jabatan" placeholder="Jabatan (Ketua/Anggota)" value="{{ t.jabatan }}">
+        <input name="tp_nip" placeholder="NIP" value="{{ t.nip }}">
+        <button type="button" class="btn sm danger del" onclick="this.parentElement.remove()">✕</button>
+      </div>
+      {% endfor %}
+    </div>
+    <button type="button" class="btn sm gray" id="add-tim">+ Tambah Anggota</button>
+  </div>
+
+  <button class="btn green" type="submit">💾 Simpan Pengaturan</button>
+</form>
+
+<template id="tim-tpl">
+  <div class="repeater-row">
+    <input name="tp_nama" placeholder="Nama">
+    <input name="tp_jabatan" placeholder="Jabatan (Ketua/Anggota)">
+    <input name="tp_nip" placeholder="NIP">
+    <button type="button" class="btn sm danger del" onclick="this.parentElement.remove()">✕</button>
+  </div>
+</template>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('add-tim').addEventListener('click', () => {
+  document.getElementById('tim').appendChild(
+    document.getElementById('tim-tpl').content.cloneNode(true));
+});
+</script>
+{% endblock %}

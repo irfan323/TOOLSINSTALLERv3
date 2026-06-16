@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Smart Arcas — Panduan Kode</h1>
+<p class="subtitle">Bantuan menentukan kode program, kegiatan, dan rekening saat input di Arcas.</p>
+
+<div class="panel">
+  <table>
+    <thead><tr><th>Kode Program</th><th>Kode Kegiatan</th><th>Kode Rekening</th><th>Contoh Penggunaan</th></tr></thead>
+    <tbody>
+      {% for p in panduan %}
+      <tr>
+        <td>{{ p.program }}</td>
+        <td>{{ p.kegiatan }}</td>
+        <td>{{ p.rekening }}</td>
+        <td class="muted">{{ p.contoh }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="hint">Daftar ini bersifat panduan umum. Sesuaikan dengan Juknis BOS &amp; RKAS sekolah
+    masing-masing. Modul dapat dikembangkan untuk pencarian kode otomatis.</p>
+</div>
+{% endblock %}

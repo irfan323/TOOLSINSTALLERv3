@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Daftar Transaksi</h1>
+<p class="subtitle">Data ditarik dari Arcas. Edit detail &amp; narasi sebelum dicetak.</p>
+
+<form method="get" class="toolbar">
+  <div>
+    <label>Bulan</label>
+    <select name="bulan" onchange="this.form.submit()">
+      <option value="0">Semua Bulan</option>
+      {% for i in range(1,13) %}
+        <option value="{{ i }}" {{ 'selected' if i==bulan }}>{{ bulan_id[i] }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label>Tahun</label>
+    <select name="tahun" onchange="this.form.submit()">
+      {% for y in [2024,2025,2026] %}
+        <option value="{{ y }}" {{ 'selected' if y==tahun }}>{{ y }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <a class="btn green" href="{{ url_for('cetak_massal', bulan=bulan, tahun=tahun) }}">🖨️ Cetak Massal</a>
+</form>
+
+{% if rows %}
+<div class="panel">
+<table>
+  <thead>
+    <tr><th>No. BPU</th><th>Tanggal</th><th>Penyedia</th><th>Narasi / Uraian</th><th class="right">Total</th><th>Aksi</th></tr>
+  </thead>
+  <tbody>
+    {% for t in rows %}
+    <tr>
+      <td><b>{{ t.no_bpu }}</b></td>
+      <td>{{ t.tanggal_indo }}</td>
+      <td>{{ t.penyedia.nama }}
+        {% if not t.penyedia.pemilik %}<br><span class="tag">pemilik belum diisi</span>{% endif %}
+      </td>
+      <td>{{ t.narasi }}<br><span class="muted" style="font-size:12px">{{ t['items']|length }} item</span></td>
+      <td class="right">{{ rupiah(t.total) }}</td>
+      <td class="actions">
+        <a class="btn sm gray" href="{{ url_for('edit_transaction', tx_id=t.id) }}">✏️ Edit</a>
+        <a class="btn sm" href="{{ url_for('view_bundle', tx_id=t.id) }}" target="_blank">👁️ Preview</a>
+        <a class="btn sm green" href="{{ url_for('bundle_pdf', tx_id=t.id) }}" target="_blank">📄 PDF</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<div class="panel"><p class="muted">Belum ada transaksi untuk periode ini. Lakukan
+  <a href="{{ url_for('dashboard') }}">Sinkron dari Arcas</a> terlebih dahulu.</p></div>
+{% endif %}
+{% endblock %}

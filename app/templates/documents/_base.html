@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>{% block doctitle %}Dokumen SPJ{% endblock %}</title>
+<style>
+  @page { size: A4; margin: 1.6cm 1.8cm; }
+  * { box-sizing: border-box; }
+  body { font-family: "Times New Roman", Georgia, serif; color: #000;
+         font-size: 12pt; line-height: 1.4; background: #fff; margin: 0; }
+  .sheet { width: 21cm; min-height: 29.7cm; padding: 1.6cm 1.8cm; margin: 0 auto;
+           background: #fff; }
+  @media screen { body { background: #525659; padding: 20px 0; }
+    .sheet { box-shadow: 0 0 12px rgba(0,0,0,.4); margin-bottom: 20px; } }
+  .kop { display: flex; align-items: center; border-bottom: 3px double #000;
+         padding-bottom: 8px; margin-bottom: 4px; gap: 12px; }
+  .kop img { height: 80px; width: auto; object-fit: contain; }
+  .kop .logo-slot { width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
+  .kop .ket { flex: 1; text-align: center; line-height: 1.25; }
+  .kop .ket .l1 { font-size: 13pt; font-weight: bold; }
+  .kop .ket .l2 { font-size: 16pt; font-weight: bold; text-transform: uppercase; }
+  .kop .ket .l3 { font-size: 12pt; }
+  .kop .ket .l4 { font-size: 10pt; }
+  .doc-title { text-align: center; font-weight: bold; font-size: 14pt;
+               text-transform: uppercase; margin: 18px 0 2px; text-decoration: underline; }
+  .doc-sub { text-align: center; font-size: 11pt; margin-bottom: 16px; }
+  table.data { width: 100%; border-collapse: collapse; margin: 10px 0; }
+  table.data th, table.data td { border: 1px solid #000; padding: 5px 7px; font-size: 11pt; }
+  table.data th { background: #f0f0f0; text-align: center; }
+  .r { text-align: right; } .c { text-align: center; }
+  .ttd-area { display: flex; justify-content: space-between; margin-top: 30px; }
+  .ttd { width: 45%; text-align: center; }
+  .ttd .sp { height: 64px; }
+  .ttd .nm { font-weight: bold; text-decoration: underline; }
+  .field { display: flex; margin: 4px 0; }
+  .field .k { width: 38%; } .field .v { flex: 1; }
+  .mt { margin-top: 14px; } .mb { margin-bottom: 14px; }
+  .toolbar-print { position: sticky; top: 0; background: #1e293b; padding: 10px 16px;
+       display: flex; gap: 8px; z-index: 5; }
+  .toolbar-print a, .toolbar-print button { background: #2563eb; color: #fff; border: none;
+       padding: 8px 14px; border-radius: 6px; font: 600 13px sans-serif; cursor: pointer;
+       text-decoration: none; }
+  @media print { .toolbar-print { display: none; } body { background: #fff; padding: 0; }
+    .sheet { box-shadow: none; margin: 0; } .page-break { page-break-before: always; } }
+</style>
+</head>
+<body>
+{% if standalone and not pdf %}
+<div class="toolbar-print no-print">
+  <button onclick="window.print()">🖨️ Cetak</button>
+  {% if pdf_url %}<a href="{{ pdf_url }}" target="_blank">📄 Unduh PDF</a>{% endif %}
+</div>
+{% endif %}
+{% block sheets %}
+<div class="sheet">
+  {% include "documents/_kop.html" %}
+  {% block content %}{% endblock %}
+</div>
+{% endblock %}
+</body>
+</html>

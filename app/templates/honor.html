@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Honorarium &amp; Transport</h1>
+<p class="subtitle">Rincian honor dihitung otomatis dari total pengeluaran &amp; harga satuan RKAS.</p>
+
+<form method="post" class="panel">
+  <div class="row">
+    <div style="flex:2"><label>Nama Kegiatan</label>
+      <input name="kegiatan" value="{{ form.kegiatan }}"></div>
+    <div><label>Tanggal</label>
+      <input type="date" name="tanggal" value="{{ form.tanggal }}"></div>
+  </div>
+  <div class="row">
+    <div><label>Total Pengeluaran (Rp)</label>
+      <input type="number" step="any" name="total" value="{{ form.total }}"></div>
+    <div><label>Harga Satuan / RKAS (Rp)</label>
+      <input type="number" step="any" name="harga" value="{{ form.harga }}"></div>
+  </div>
+  <p class="hint">Volume tiap penerima akan terisi otomatis: total ÷ harga satuan, dibagi ke penerima.</p>
+
+  <h2 style="margin-top:18px">Daftar Penerima Honor</h2>
+  <div id="penerima">
+    {% for p in form.penerima %}
+    <div class="repeater-row">
+      <input name="nama" placeholder="Nama" value="{{ p.nama }}">
+      <input name="jabatan" placeholder="Jabatan" value="{{ p.jabatan }}">
+      <input name="nip" placeholder="NIP" value="{{ p.nip }}">
+      <input name="satuan" placeholder="Satuan" value="{{ p.satuan or 'OK' }}" style="max-width:90px">
+      <button type="button" class="btn sm danger del" onclick="this.parentElement.remove()">✕</button>
+    </div>
+    {% endfor %}
+  </div>
+  <button type="button" class="btn sm gray" id="add-penerima">+ Tambah Penerima</button>
+
+  <div style="margin-top:18px; display:flex; gap:10px">
+    <button class="btn" name="action" value="hitung" type="submit">🧮 Hitung Rincian</button>
+    <button class="btn green" name="cetak" value="1" type="submit">🖨️ Cetak Dokumen Honor (PDF)</button>
+  </div>
+</form>
+
+{% if result %}
+<div class="panel">
+  <h2>Hasil Perhitungan — Total Volume: {{ result.total_volume }}</h2>
+  <table>
+    <thead><tr><th>No</th><th>Nama</th><th>Jabatan</th><th class="right">Volume</th><th class="right">Harga</th><th class="right">Jumlah</th></tr></thead>
+    <tbody>
+      {% for r in result.rows %}
+      <tr><td>{{ r.no }}</td><td>{{ r.nama }}</td><td>{{ r.jabatan }}</td>
+          <td class="right">{{ r.volume }} {{ r.satuan }}</td><td class="right">{{ r.harga_rp }}</td>
+          <td class="right">{{ r.jumlah_rp }}</td></tr>
+      {% endfor %}
+    </tbody>
+    <tfoot><tr><th colspan="5" class="right">TOTAL</th><th class="right">{{ result.total_rp }}</th></tr></tfoot>
+  </table>
+  <p class="hint">Terbilang: {{ result.terbilang }}</p>
+</div>
+{% endif %}
+
+<template id="row-tpl">
+  <div class="repeater-row">
+    <input name="nama" placeholder="Nama">
+    <input name="jabatan" placeholder="Jabatan">
+    <input name="nip" placeholder="NIP">
+    <input name="satuan" placeholder="Satuan" value="OK" style="max-width:90px">
+    <button type="button" class="btn sm danger del" onclick="this.parentElement.remove()">✕</button>
+  </div>
+</template>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('add-penerima').addEventListener('click', () => {
+  const t = document.getElementById('row-tpl').content.cloneNode(true);
+  document.getElementById('penerima').appendChild(t);
+});
+</script>
+{% endblock %}

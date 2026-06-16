@@ -1,0 +1,16 @@
+<div class="kop">
+  <div class="logo-slot">
+    {% if logo_pemda_uri %}<img src="{{ logo_pemda_uri }}" alt="Logo Pemda">{% endif %}
+  </div>
+  <div class="ket">
+    <div class="l1">{{ s.nama_pemda }}</div>
+    <div class="l1">{{ s.nama_dinas }}</div>
+    <div class="l2">{{ s.satuan_pendidikan }}</div>
+    <div class="l4">{{ s.alamat_sekolah }}{% if s.desa %}, {{ s.desa }}{% endif %}
+      {% if s.kecamatan %}, Kec. {{ s.kecamatan }}{% endif %}
+      {% if s.kabupaten %}, {{ s.kabupaten }}{% endif %} — NPSN {{ s.npsn }}</div>
+  </div>
+  <div class="logo-slot">
+    {% if logo_sekolah_uri %}<img src="{{ logo_sekolah_uri }}" alt="Logo Sekolah">{% endif %}
+  </div>
+</div>

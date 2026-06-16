@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Dashboard</h1>
+<p class="subtitle">Otomatisasi cetak dokumen SPJ Dana BOS dari database Arcas.</p>
+
+<div class="panel">
+  <h2>Sinkronisasi Data Arcas</h2>
+  {% if not settings.arcas_db_path %}
+    <div class="flash warning">Database Arcas belum dihubungkan. Buka
+      <a href="{{ url_for('settings_page') }}">Pengaturan</a> untuk mengatur path,
+      atau buat data contoh di sana.</div>
+  {% endif %}
+  <form method="post" action="{{ url_for('sync') }}" class="toolbar">
+    <div>
+      <label>Bulan</label>
+      <select name="bulan">
+        <option value="0">Semua Bulan</option>
+        {% for i in range(1,13) %}
+          <option value="{{ i }}" {{ 'selected' if i==bulan }}>{{ bulan_id[i] }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Tahun Anggaran</label>
+      <select name="tahun">
+        {% for y in [2024,2025,2026] %}
+          <option value="{{ y }}" {{ 'selected' if y==tahun }}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="btn green" type="submit">🔄 Sinkron dari Arcas</button>
+    <button class="btn gray" type="button" id="btn-test">Tes Koneksi</button>
+    <span id="test-msg" class="hint"></span>
+  </form>
+</div>
+
+<div class="grid cards">
+  <div class="card"><h3>Transaksi (periode)</h3><div class="big">{{ jumlah_transaksi }}</div></div>
+  <div class="card"><h3>Total Belanja</h3><div class="big">{{ rupiah(total) }}</div></div>
+  <div class="card"><h3>Total Tersimpan</h3><div class="big">{{ total_all }}</div></div>
+  <div class="card"><h3>Tahun Anggaran</h3><div class="big">{{ tahun }}</div></div>
+</div>
+
+<div class="panel" style="margin-top:20px">
+  <h2>Aksi Cepat</h2>
+  <div class="doc-actions">
+    <a class="btn" href="{{ url_for('transactions', bulan=bulan, tahun=tahun) }}">📋 Lihat Transaksi</a>
+    <a class="btn" href="{{ url_for('cetak_massal', bulan=bulan, tahun=tahun) }}">🖨️ Cetak Massal (ZIP per BPU)</a>
+    <a class="btn gray" href="{{ url_for('honor') }}">💰 Cetak Dokumen Honor</a>
+  </div>
+  <p class="hint">Cetak Massal menghasilkan satu file SPJ (Kuitansi, Pesanan &amp; Faktur, BAST,
+  Berita Acara Pemeriksaan) untuk tiap transaksi, tersusun dalam folder per nomor BPU.</p>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('btn-test').addEventListener('click', async () => {
+  const el = document.getElementById('test-msg');
+  el.textContent = 'Menghubungkan...';
+  const r = await fetch('{{ url_for("sync_test") }}', {method:'POST'});
+  const d = await r.json();
+  el.textContent = (d.ok ? '✅ ' : '❌ ') + d.message;
+  el.style.color = d.ok ? '#4ade80' : '#fca5a5';
+});
+</script>
+{% endblock %}

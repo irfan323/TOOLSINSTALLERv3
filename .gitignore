@@ -102,3 +102,12 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# --- SPJ BOS App runtime artifacts ---
+app/data/*.json
+app/data/*.db
+app/output/
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+!app/data/.gitkeep
+app/.venv/
