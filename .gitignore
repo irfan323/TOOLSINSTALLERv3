@@ -102,3 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# SPJ output
+SPJ_BBPVP_Makassar.xlsx
+*.xlsx
