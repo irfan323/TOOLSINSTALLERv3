@@ -22,6 +22,10 @@ dinamis), membaca database lokal Arcas berbasis **SQLite**.
 
 ## Menjalankan
 
+> **Pengguna non-teknis:** ikuti panduan mudah **[JALANKAN_DI_KOMPUTER.md](JALANKAN_DI_KOMPUTER.md)**
+> (Windows tinggal klik `start_windows.bat`). Ingin online dapat link? Lihat
+> **[DEPLOY.md](DEPLOY.md)**.
+
 ```bash
 cd app
 ./run.sh           # membuat venv, memasang dependensi, menjalankan server

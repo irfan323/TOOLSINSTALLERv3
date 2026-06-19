@@ -57,6 +57,7 @@ def inject_globals():
         "logo_pemda_uri": logo_data_uri(s.get("logo_pemda", "")),
         "logo_sekolah_uri": logo_data_uri(s.get("logo_sekolah", "")),
         "rupiah": documents.rupiah,
+        "can_pdf": documents.weasyprint_available(),
     }
 
 
@@ -185,6 +186,10 @@ def view_doc(tx_id, doctype):
 def doc_pdf(tx_id, doctype):
     if doctype not in DOC_TYPES:
         abort(404)
+    if not documents.weasyprint_available():
+        flash("Untuk menyimpan PDF: buka preview lalu tekan Ctrl+P → "
+              "'Simpan sebagai PDF'. (WeasyPrint belum terpasang.)", "warning")
+        return redirect(url_for("view_doc", tx_id=tx_id, doctype=doctype))
     ctx = documents.doc_context(tx_id)
     if not ctx:
         abort(404)
@@ -217,6 +222,10 @@ def view_bundle(tx_id):
 
 @app.route("/transaction/<tx_id>/bundle.pdf")
 def bundle_pdf(tx_id):
+    if not documents.weasyprint_available():
+        flash("Untuk menyimpan PDF: pada halaman preview tekan Ctrl+P → "
+              "'Simpan sebagai PDF'. (WeasyPrint belum terpasang.)", "warning")
+        return redirect(url_for("view_bundle", tx_id=tx_id))
     html, ctx = _bundle_html(tx_id, pdf=True)
     if html is None:
         abort(404)
@@ -231,6 +240,26 @@ def bundle_pdf(tx_id):
 
 
 # --- Cetak Massal -----------------------------------------------------------
+@app.route("/cetak-massal/print")
+def cetak_massal_print():
+    """Versi cetak massal tanpa WeasyPrint: semua dokumen dalam satu halaman
+    HTML dengan pemisah halaman, siap disimpan via Ctrl+P → 'Simpan sebagai PDF'.
+    """
+    bulan, tahun = current_filter()
+    rows = filtered_cache(bulan, tahun)
+    if not rows:
+        flash("Tidak ada transaksi pada periode terpilih.", "warning")
+        return redirect(url_for("dashboard", bulan=bulan, tahun=tahun))
+    s = store.get_settings()
+    bundles = [documents.merge_transaksi(t) for t in rows]
+    return render_template(
+        "documents/print_all.html", bundles=bundles, s=s, standalone=True,
+        logo_pemda_uri=logo_data_uri(s.get("logo_pemda", "")),
+        logo_sekolah_uri=logo_data_uri(s.get("logo_sekolah", "")),
+        rupiah=documents.rupiah,
+    )
+
+
 @app.route("/cetak-massal")
 def cetak_massal():
     bulan, tahun = current_filter()
@@ -238,6 +267,12 @@ def cetak_massal():
     if not rows:
         flash("Tidak ada transaksi pada periode terpilih.", "warning")
         return redirect(url_for("dashboard", bulan=bulan, tahun=tahun))
+
+    # Tanpa WeasyPrint: arahkan ke versi cetak HTML (Simpan sebagai PDF).
+    if not documents.weasyprint_available():
+        flash("Cetak massal dibuka sebagai halaman cetak. Tekan Ctrl+P → "
+              "'Simpan sebagai PDF' untuk menyimpan semua dokumen.", "warning")
+        return redirect(url_for("cetak_massal_print", bulan=bulan, tahun=tahun))
 
     mem = io.BytesIO()
     with zipfile.ZipFile(mem, "w", zipfile.ZIP_DEFLATED) as zf:
@@ -401,4 +436,12 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     host = os.environ.get("HOST", "127.0.0.1")
     debug = os.environ.get("DEBUG", "1") == "1"
+    # Buka browser otomatis saat dijalankan lokal (sekali, bukan saat reload).
+    if (os.environ.get("OPEN_BROWSER", "1") == "1"
+            and os.environ.get("WERKZEUG_RUN_MAIN") != "true"):
+        import threading
+        import webbrowser
+        threading.Timer(
+            1.5, lambda: webbrowser.open(f"http://127.0.0.1:{port}")
+        ).start()
     app.run(host=host, port=port, debug=debug, threaded=True)

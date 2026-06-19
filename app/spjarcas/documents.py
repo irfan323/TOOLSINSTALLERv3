@@ -136,6 +136,15 @@ def hitung_honor(total: float, harga_satuan: float, penerima: list[dict]) -> dic
 
 
 # --- Generator PDF ----------------------------------------------------------
+def weasyprint_available() -> bool:
+    """True bila WeasyPrint + pustaka sistemnya siap dipakai."""
+    try:
+        import weasyprint  # noqa: F401
+        return True
+    except Exception:
+        return False
+
+
 def render_pdf(html: str, base_url: str | None = None) -> bytes:
     from weasyprint import HTML
     return HTML(string=html, base_url=base_url).write_pdf()

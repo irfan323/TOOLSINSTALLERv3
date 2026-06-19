@@ -47,8 +47,11 @@
 <body>
 {% if standalone and not pdf %}
 <div class="toolbar-print no-print">
-  <button onclick="window.print()">🖨️ Cetak</button>
-  {% if pdf_url %}<a href="{{ pdf_url }}" target="_blank">📄 Unduh PDF</a>{% endif %}
+  <button onclick="window.print()">🖨️ Cetak / Simpan sebagai PDF</button>
+  {% if pdf_url and can_pdf %}<a href="{{ pdf_url }}" target="_blank">📄 Unduh PDF</a>{% endif %}
+  <span style="color:#cbd5e1; font:13px sans-serif; align-self:center">
+    Tip: tekan <b>Ctrl+P</b> (⌘+P di Mac) lalu pilih <b>“Simpan sebagai PDF”</b>.
+  </span>
 </div>
 {% endif %}
 {% block sheets %}

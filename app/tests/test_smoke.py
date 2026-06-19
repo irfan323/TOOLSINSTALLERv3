@@ -84,6 +84,21 @@ def test_cetak_massal_zip(client):
     assert r.status_code == 200 and r.data[:2] == b"PK"
 
 
+def test_cetak_massal_print_html(client):
+    # Halaman cetak massal berbasis HTML (tanpa WeasyPrint): 3 transaksi x 4 dok.
+    r = client.get("/cetak-massal/print?tahun=2026")
+    assert r.status_code == 200
+    assert r.data.count(b'class="sheet') == 12
+
+
+def test_pdf_fallback_without_weasyprint(client, monkeypatch):
+    monkeypatch.setattr(documents, "weasyprint_available", lambda: False)
+    tx_id = store.get_cache()[0]["id"]
+    # rute PDF mengalihkan ke preview HTML, bukan error
+    assert client.get(f"/transaction/{tx_id}/bundle.pdf").status_code == 302
+    assert client.get("/cetak-massal?tahun=2026").status_code == 302
+
+
 def test_edit_override(client):
     tx_id = store.get_cache()[0]["id"]
     client.post(f"/transaction/{tx_id}/edit",
