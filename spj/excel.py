@@ -291,20 +291,27 @@ def sheet_hps(wb, paket, nama_sheet):
     return ws
 
 
+def _judul_lampiran(ws, last_col, judul_lampiran, nomor, tanggal, kejuruan):
+    """Kop surat + blok judul lampiran rata tengah yang rapi."""
+    r = _kop_surat(ws, last_col)
+    for i, line in enumerate(judul_lampiran):
+        _merge(ws, r, 1, last_col, line, font=F_TITLE if i == 0 else F_SUB)
+        ws.row_dimensions[r].height = 22 if i == 0 else 18
+        r += 1
+    r += 1
+    _merge(ws, r, 1, last_col, f"Nomor    :  {nomor}", font=F_NORM)
+    _merge(ws, r + 1, 1, last_col, f"Tanggal  :  {tanggal}", font=F_NORM)
+    _merge(ws, r + 2, 1, last_col, f"Kejuruan :  {kejuruan}", font=F_SUB)
+    return r + 4
+
+
 def sheet_lampiran_polos(wb, paket, nama_sheet, judul_lampiran, nomor, tanggal,
                          keterangan="", ttd="pengadaan"):
     ws = wb.create_sheet(nama_sheet)
     last_col = 6
     widths = [5, 26, 54, 9, 9, 22]
     _autosize(ws, widths)
-    r = 1
-    for line in judul_lampiran:
-        _merge(ws, r, 1, last_col, line, font=F_SUB, align=LEFT_MID)
-        r += 1
-    _merge(ws, r, 1, last_col, f"NOMOR   : {nomor}", font=F_NORM, align=LEFT_MID)
-    _merge(ws, r + 1, 1, last_col, f"TANGGAL : {tanggal}", font=F_NORM, align=LEFT_MID)
-    _merge(ws, r + 2, 1, last_col, f"Kejuruan : {paket['judul']}", font=F_SUB, align=LEFT_MID)
-    r += 4
+    r = _judul_lampiran(ws, last_col, judul_lampiran, nomor, tanggal, paket["judul"])
     end = _tabel_tanpa_harga(ws, r, paket["items"], widths, keterangan=keterangan)
     r = end + 2
     if ttd == "pengadaan":
@@ -326,14 +333,7 @@ def sheet_lampiran_harga(wb, paket, nama_sheet, judul_lampiran, nomor, tanggal,
     last_col = 7
     widths = [5, 24, 50, 8, 9, 16, 17]
     _autosize(ws, widths)
-    r = 1
-    for line in judul_lampiran:
-        _merge(ws, r, 1, last_col, line, font=F_SUB, align=LEFT_MID)
-        r += 1
-    _merge(ws, r, 1, last_col, f"NOMOR   : {nomor}", font=F_NORM, align=LEFT_MID)
-    _merge(ws, r + 1, 1, last_col, f"TANGGAL : {tanggal}", font=F_NORM, align=LEFT_MID)
-    _merge(ws, r + 2, 1, last_col, f"Kejuruan : {paket['judul']}", font=F_SUB, align=LEFT_MID)
-    r += 4
+    r = _judul_lampiran(ws, last_col, judul_lampiran, nomor, tanggal, paket["judul"])
     end, _ = _tabel_harga(ws, r, paket["items"], widths, nilai_total=nilai_total)
     r = end + 2
     if ttd_dua:
