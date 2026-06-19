@@ -1,0 +1,42 @@
+<div class="doc-title">Surat Pesanan &amp; Faktur Pembelian</div>
+<div class="doc-sub">No. BPU: {{ tx.no_bpu }} &nbsp;•&nbsp; Tanggal: {{ tx.tanggal_indo }}</div>
+
+<table style="width:100%; margin-bottom:8px">
+  <tr><td style="width:18%">Kepada</td><td>: {{ tx.penyedia.nama }}</td></tr>
+  <tr><td>Alamat</td><td>: {{ tx.penyedia.alamat }}</td></tr>
+  <tr><td>Telepon</td><td>: {{ tx.penyedia.telepon }}</td></tr>
+</table>
+
+<p>Mohon disediakan barang/jasa berikut untuk keperluan {{ tx.kegiatan or tx.narasi }}:</p>
+
+<table class="data">
+  <thead>
+    <tr><th style="width:6%">No</th><th>Nama Barang/Jasa</th><th style="width:10%">Volume</th>
+        <th style="width:10%">Satuan</th><th style="width:18%">Harga Satuan</th><th style="width:18%">Jumlah</th></tr>
+  </thead>
+  <tbody>
+    {% for it in tx['items'] %}
+    <tr><td class="c">{{ loop.index }}</td><td>{{ it.nama }}</td><td class="c">{{ it.volume }}</td>
+        <td class="c">{{ it.satuan }}</td><td class="r">{{ it.harga_rp }}</td><td class="r">{{ it.jumlah_rp }}</td></tr>
+    {% endfor %}
+    <tr><th colspan="5" class="r">JUMLAH TOTAL</th><th class="r">{{ tx.total_rp }}</th></tr>
+  </tbody>
+</table>
+<p><i>Terbilang: {{ tx.terbilang }}</i></p>
+
+<div class="ttd-area">
+  <div class="ttd">
+    <div>Pemesan,</div>
+    <div>Bendahara BOS</div>
+    <div class="sp"></div>
+    <div class="nm">{{ s.bendahara }}</div>
+    <div>NIP. {{ s.nip_bendahara }}</div>
+  </div>
+  <div class="ttd">
+    <div>{{ s.kabupaten }}, {{ tx.tanggal_indo }}</div>
+    <div>Penyedia,</div>
+    <div class="sp"></div>
+    <div class="nm">{{ tx.penyedia.pemilik or tx.penyedia.nama }}</div>
+    <div>{{ tx.penyedia.nama }}</div>
+  </div>
+</div>

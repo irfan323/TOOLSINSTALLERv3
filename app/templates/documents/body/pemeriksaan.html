@@ -1,0 +1,41 @@
+<div class="doc-title">Berita Acara Pemeriksaan Barang</div>
+<div class="doc-sub">Nomor: 027/BAP/{{ tx.no_bpu }}/{{ s.tahun_anggaran }}</div>
+
+<p>Pada hari ini, {{ tx.tanggal_indo }}, Tim Pemeriksa Barang {{ s.satuan_pendidikan }}
+yang ditetapkan berdasarkan Surat Keputusan Kepala Sekolah, telah melakukan
+pemeriksaan terhadap barang/jasa dengan hasil sebagai berikut:</p>
+
+<table class="data">
+  <thead><tr><th style="width:6%">No</th><th>Nama Barang/Jasa</th><th style="width:12%">Volume</th>
+      <th style="width:12%">Satuan</th><th style="width:20%">Hasil Pemeriksaan</th></tr></thead>
+  <tbody>
+    {% for it in tx['items'] %}
+    <tr><td class="c">{{ loop.index }}</td><td>{{ it.nama }}</td><td class="c">{{ it.volume }}</td>
+        <td class="c">{{ it.satuan }}</td><td class="c">Baik / Sesuai</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<p>Berdasarkan hasil pemeriksaan, barang/jasa tersebut dinyatakan <b>SESUAI</b> dengan
+pesanan dan dalam kondisi <b>BAIK</b>, sehingga dapat diterima dan dipergunakan.</p>
+
+<p class="mt">Tim Pemeriksa Barang:</p>
+<table class="data">
+  <thead><tr><th style="width:6%">No</th><th>Nama</th><th>Jabatan</th><th style="width:22%">Tanda Tangan</th></tr></thead>
+  <tbody>
+    {% for m in s.tim_pemeriksa %}
+    <tr><td class="c">{{ loop.index }}</td><td>{{ m.nama }}{% if m.nip %}<br><span style="font-size:9pt">NIP. {{ m.nip }}</span>{% endif %}</td>
+        <td>{{ m.jabatan }}</td><td class="c" style="height:42px">{{ loop.index }}. ……………</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="ttd-area">
+  <div class="ttd" style="width:100%; text-align:right; padding-right:30px">
+    <div>{{ s.kabupaten }}, {{ tx.tanggal_indo }}</div>
+    <div>Mengetahui, Kepala {{ s.satuan_pendidikan }}</div>
+    <div class="sp"></div>
+    <div class="nm">{{ s.kepala_sekolah }}</div>
+    <div>NIP. {{ s.nip_kepala }}</div>
+  </div>
+</div>

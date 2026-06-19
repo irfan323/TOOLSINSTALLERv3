@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Edit Transaksi — {{ tx.no_bpu }}</h1>
+<p class="subtitle">Sesuaikan detail yang tidak tersedia/ tidak lengkap di Arcas, lalu cetak.</p>
+
+<div class="row" style="align-items:flex-start">
+  <form method="post" class="panel" style="flex:2">
+    <h2>Data Penyedia</h2>
+    <div class="row">
+      <div><label>Nama Toko</label>
+        <input name="nama_toko" value="{{ tx.penyedia.nama }}"></div>
+      <div><label>Telepon</label>
+        <input name="telepon" value="{{ tx.penyedia.telepon }}"></div>
+    </div>
+    <label>Alamat Toko</label>
+    <input name="alamat" value="{{ tx.penyedia.alamat }}">
+    <label>Nama Pemilik Toko / Penyedia <span class="muted">(sering kosong di Arcas)</span></label>
+    <input name="pemilik" value="{{ tx.penyedia.pemilik }}" placeholder="mis. H. Abdullah">
+
+    <h2 style="margin-top:22px">Narasi Belanja</h2>
+    <label>Narasi Induk (tampil di Kuitansi)</label>
+    <textarea name="narasi">{{ tx.narasi }}</textarea>
+    <p class="hint">Saran rangkuman: <b>{{ saran }}</b>
+      <button type="button" class="btn sm gray" onclick="document.querySelector('[name=narasi]').value='{{ saran }}'">Gunakan</button>
+      — merangkum {{ tx['items']|length }} item kecil menjadi satu narasi rapi.</p>
+
+    <label>Tanggal (override, opsional)</label>
+    <input type="date" name="tanggal" value="{{ tx.tanggal }}">
+
+    <div style="margin-top:18px"><button class="btn green" type="submit">💾 Simpan Perubahan</button></div>
+  </form>
+
+  <div class="panel" style="flex:1.4">
+    <h2>Rincian Item ({{ tx['items']|length }})</h2>
+    <table>
+      <thead><tr><th>Item</th><th class="right">Vol</th><th class="right">Harga</th><th class="right">Jumlah</th></tr></thead>
+      <tbody>
+        {% for it in tx['items'] %}
+        <tr><td>{{ it.nama }}</td><td class="right">{{ it.volume }} {{ it.satuan }}</td>
+            <td class="right">{{ it.harga_rp }}</td><td class="right">{{ it.jumlah_rp }}</td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot><tr><th colspan="3" class="right">TOTAL</th><th class="right">{{ tx.total_rp }}</th></tr></tfoot>
+    </table>
+    <p class="hint">Item rincian berasal dari Arcas. Untuk merapikan kuitansi, gunakan Narasi Induk di kiri.</p>
+
+    <h2 style="margin-top:18px">Cetak Dokumen</h2>
+    <div class="doc-actions">
+      {% for k, label in DOC_TYPES.items() %}
+        <a class="btn sm gray" target="_blank" href="{{ url_for('view_doc', tx_id=tx.id, doctype=k) }}">{{ label }}</a>
+      {% endfor %}
+    </div>
+    <div class="doc-actions">
+      <a class="btn" target="_blank" href="{{ url_for('view_bundle', tx_id=tx.id) }}">👁️ Preview Semua</a>
+      <a class="btn green" target="_blank" href="{{ url_for('bundle_pdf', tx_id=tx.id) }}">📄 Unduh PDF SPJ</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

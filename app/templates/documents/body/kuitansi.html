@@ -1,0 +1,39 @@
+<div class="doc-title">Kuitansi</div>
+<div class="doc-sub">No. BPU: {{ tx.no_bpu }}</div>
+
+<table style="width:100%; margin-top:10px">
+  <tr><td style="width:38%">Sudah terima dari</td><td>: Bendahara BOS {{ s.satuan_pendidikan }}</td></tr>
+  <tr><td>Uang sebanyak</td><td>: <b><i>{{ tx.terbilang }}</i></b></td></tr>
+  <tr><td style="vertical-align:top">Untuk pembayaran</td><td>: {{ tx.narasi }}</td></tr>
+</table>
+
+<div style="border:2px solid #000; display:inline-block; padding:6px 18px; margin-top:14px; font-size:14pt; font-weight:bold;">
+  {{ tx.total_rp }}
+</div>
+
+<div class="ttd-area">
+  <div class="ttd">
+    <div>Mengetahui,</div>
+    <div>Kepala {{ s.satuan_pendidikan }}</div>
+    <div class="sp"></div>
+    <div class="nm">{{ s.kepala_sekolah }}</div>
+    <div>NIP. {{ s.nip_kepala }}</div>
+  </div>
+  <div class="ttd">
+    <div>{{ s.kabupaten }}, {{ tx.tanggal_indo }}</div>
+    <div>Yang menerima,</div>
+    <div class="sp"></div>
+    <div class="nm">{{ tx.penyedia.pemilik or tx.penyedia.nama }}</div>
+    <div>{{ tx.penyedia.nama }}</div>
+  </div>
+</div>
+
+<div class="mt" style="text-align:center; margin-top:18px">
+  <div style="display:inline-block; text-align:center">
+    <div>Lunas dibayar,</div>
+    <div>Bendahara BOS</div>
+    <div class="sp" style="height:56px"></div>
+    <div class="nm">{{ s.bendahara }}</div>
+    <div>NIP. {{ s.nip_bendahara }}</div>
+  </div>
+</div>

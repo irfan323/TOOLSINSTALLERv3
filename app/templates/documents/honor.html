@@ -1,0 +1,40 @@
+{% extends "documents/_base.html" %}
+{% block doctitle %}Dokumen Honor{% endblock %}
+{% block content %}
+<div class="doc-title">Daftar Penerimaan Honorarium / Transport</div>
+<div class="doc-sub">{{ form.kegiatan }}{% if tanggal_indo %} &nbsp;•&nbsp; {{ tanggal_indo }}{% endif %}</div>
+
+<table class="data">
+  <thead>
+    <tr><th style="width:5%">No</th><th>Nama</th><th>Jabatan</th><th style="width:10%">Volume</th>
+        <th style="width:16%">Harga Satuan</th><th style="width:16%">Jumlah</th><th style="width:12%">Tanda Tangan</th></tr>
+  </thead>
+  <tbody>
+    {% for r in result.rows %}
+    <tr><td class="c">{{ r.no }}</td><td>{{ r.nama }}{% if r.nip %}<br><span style="font-size:9pt">NIP. {{ r.nip }}</span>{% endif %}</td>
+        <td>{{ r.jabatan }}</td><td class="c">{{ r.volume }} {{ r.satuan }}</td>
+        <td class="r">{{ r.harga_rp }}</td><td class="r">{{ r.jumlah_rp }}</td>
+        <td class="c">{{ r.no }}. ……</td></tr>
+    {% endfor %}
+    <tr><th colspan="5" class="r">JUMLAH</th><th class="r">{{ result.total_rp }}</th><th></th></tr>
+  </tbody>
+</table>
+<p><i>Terbilang: {{ result.terbilang }}</i></p>
+
+<div class="ttd-area">
+  <div class="ttd">
+    <div>Mengetahui,</div>
+    <div>Kepala {{ s.satuan_pendidikan }}</div>
+    <div class="sp"></div>
+    <div class="nm">{{ s.kepala_sekolah }}</div>
+    <div>NIP. {{ s.nip_kepala }}</div>
+  </div>
+  <div class="ttd">
+    <div>{{ s.kabupaten }}{% if tanggal_indo %}, {{ tanggal_indo }}{% endif %}</div>
+    <div>Bendahara BOS</div>
+    <div class="sp"></div>
+    <div class="nm">{{ s.bendahara }}</div>
+    <div>NIP. {{ s.nip_bendahara }}</div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+<div class="doc-title">Berita Acara Serah Terima Barang/Jasa</div>
+<div class="doc-sub">Nomor: 027/BAST/{{ tx.no_bpu }}/{{ s.tahun_anggaran }}</div>
+
+<p>Pada hari ini, {{ tx.tanggal_indo }}, yang bertanda tangan di bawah ini:</p>
+
+<table style="width:100%">
+  <tr><td style="width:6%; vertical-align:top">I.</td><td>
+    <div class="field"><div class="k">Nama</div><div class="v">: {{ tx.penyedia.pemilik or tx.penyedia.nama }}</div></div>
+    <div class="field"><div class="k">Jabatan</div><div class="v">: Penyedia / {{ tx.penyedia.nama }}</div></div>
+    <div class="field"><div class="k">Alamat</div><div class="v">: {{ tx.penyedia.alamat }}</div></div>
+    Selanjutnya disebut <b>PIHAK PERTAMA</b>.
+  </td></tr>
+  <tr><td style="vertical-align:top">II.</td><td>
+    <div class="field"><div class="k">Nama</div><div class="v">: {{ s.bendahara }}</div></div>
+    <div class="field"><div class="k">Jabatan</div><div class="v">: Bendahara BOS {{ s.satuan_pendidikan }}</div></div>
+    <div class="field"><div class="k">Alamat</div><div class="v">: {{ s.alamat_sekolah }}</div></div>
+    Selanjutnya disebut <b>PIHAK KEDUA</b>.
+  </td></tr>
+</table>
+
+<p>PIHAK PERTAMA menyerahkan barang/jasa kepada PIHAK KEDUA, dan PIHAK KEDUA
+menerima barang/jasa dalam kondisi baik, dengan rincian sebagai berikut:</p>
+
+<table class="data">
+  <thead><tr><th style="width:6%">No</th><th>Nama Barang/Jasa</th><th style="width:14%">Volume</th><th style="width:14%">Satuan</th></tr></thead>
+  <tbody>
+    {% for it in tx['items'] %}
+    <tr><td class="c">{{ loop.index }}</td><td>{{ it.nama }}</td><td class="c">{{ it.volume }}</td><td class="c">{{ it.satuan }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<p>Demikian Berita Acara Serah Terima ini dibuat dengan sebenarnya untuk dapat
+dipergunakan sebagaimana mestinya.</p>
+
+<div class="ttd-area">
+  <div class="ttd">
+    <div>PIHAK PERTAMA</div><div>Penyedia,</div>
+    <div class="sp"></div>
+    <div class="nm">{{ tx.penyedia.pemilik or tx.penyedia.nama }}</div>
+  </div>
+  <div class="ttd">
+    <div>PIHAK KEDUA</div><div>Bendahara BOS,</div>
+    <div class="sp"></div>
+    <div class="nm">{{ s.bendahara }}</div>
+    <div>NIP. {{ s.nip_bendahara }}</div>
+  </div>
+</div>

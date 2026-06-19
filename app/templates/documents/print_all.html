@@ -1,0 +1,15 @@
+{% extends "documents/_base.html" %}
+{% block doctitle %}Cetak Massal SPJ{% endblock %}
+{% block sheets %}
+{% set ns = namespace(first=True) %}
+{% for b in bundles %}
+  {% set tx = b %}
+  {% for doc in ['kuitansi','pesanan','bast','pemeriksaan'] %}
+    <div class="sheet {{ '' if ns.first else 'page-break' }}">
+      {% include "documents/_kop.html" %}
+      {% include "documents/body/" + doc + ".html" %}
+    </div>
+    {% set ns.first = False %}
+  {% endfor %}
+{% endfor %}
+{% endblock %}

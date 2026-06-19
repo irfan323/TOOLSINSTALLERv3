@@ -1,0 +1,4 @@
+{% extends "documents/_base.html" %}
+{% set pdf_url = url_for('doc_pdf', tx_id=tx.id, doctype='bast') %}
+{% block doctitle %}BAST {{ tx.no_bpu }}{% endblock %}
+{% block content %}{% include "documents/body/bast.html" %}{% endblock %}

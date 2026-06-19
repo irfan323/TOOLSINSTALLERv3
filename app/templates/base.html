@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}SPJ BOS Otomatis{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">SPJ BOS Otomatis
+      <small>Integrasi Arcas / ARKAS</small>
+    </div>
+    <nav class="nav">
+      {% set ep = request.endpoint %}
+      <a class="{{ 'active' if ep=='dashboard' }}" href="{{ url_for('dashboard') }}"><span class="ico">🏠</span> Dashboard</a>
+      <a class="{{ 'active' if ep in ['transactions','edit_transaction'] }}" href="{{ url_for('transactions') }}"><span class="ico">📋</span> Transaksi</a>
+      <a class="{{ 'active' if ep=='honor' }}" href="{{ url_for('honor') }}"><span class="ico">💰</span> Honor & Transport</a>
+      <a class="{{ 'active' if ep=='smart_arcas' }}" href="{{ url_for('smart_arcas') }}"><span class="ico">🧠</span> Smart Arcas</a>
+      <a class="{{ 'active' if ep=='settings_page' }}" href="{{ url_for('settings_page') }}"><span class="ico">⚙️</span> Pengaturan</a>
+    </nav>
+    <div style="margin-top:24px; font-size:12px; color:var(--muted)">
+      Tahun Anggaran: <b>{{ settings.tahun_anggaran }}</b><br>
+      {{ settings.satuan_pendidikan }}
+    </div>
+  </aside>
+  <main class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash {{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block body %}{% endblock %}
+  </main>
+</div>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

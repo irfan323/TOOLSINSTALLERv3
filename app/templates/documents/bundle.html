@@ -1,0 +1,11 @@
+{% extends "documents/_base.html" %}
+{% set pdf_url = url_for('bundle_pdf', tx_id=tx.id) %}
+{% block doctitle %}SPJ {{ tx.no_bpu }}{% endblock %}
+{% block sheets %}
+{% for body in ['kuitansi','pesanan','bast','pemeriksaan'] %}
+<div class="sheet {{ 'page-break' if not loop.first }}">
+  {% include "documents/_kop.html" %}
+  {% include "documents/body/" + body + ".html" %}
+</div>
+{% endfor %}
+{% endblock %}
