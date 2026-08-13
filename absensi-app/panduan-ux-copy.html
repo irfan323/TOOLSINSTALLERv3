@@ -1,0 +1,308 @@
+<title>Panduan UX Copy E-Absensi</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#f3f4fb; --surface:#ffffff; --surface-2:#eceef8; --surface-3:#f7f8fd;
+    --ink:#191833; --ink-soft:#54536e; --ink-faint:#8c8ba6;
+    --border:#e3e4f0; --border-strong:#d2d3e6;
+    --accent:#4f46e5; --accent-ink:#3b34c9; --accent-soft:#eeefff;
+    --bad:#c02636; --bad-ink:#a01f2d; --bad-bg:#fdecef; --bad-border:#f4ccd3;
+    --good:#12784a; --good-ink:#0d6440; --good-bg:#e8f6ee; --good-border:#c1e6d0;
+    --shadow:0 1px 2px rgba(25,24,51,.04),0 8px 24px -12px rgba(25,24,51,.14);
+    --mono:"SFMono-Regular",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f0e1a; --surface:#181726; --surface-2:#201f31; --surface-3:#141322;
+      --ink:#ecebf6; --ink-soft:#a6a5c1; --ink-faint:#6d6c88;
+      --border:#2a2940; --border-strong:#38375074;
+      --accent:#a29dff; --accent-ink:#c3bfff; --accent-soft:#211f42;
+      --bad:#f18a97; --bad-ink:#f7abb4; --bad-bg:#2a1620; --bad-border:#48222e;
+      --good:#63d59a; --good-ink:#8fe3b6; --good-bg:#0f2419; --good-border:#204536;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 30px -16px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f0e1a; --surface:#181726; --surface-2:#201f31; --surface-3:#141322;
+    --ink:#ecebf6; --ink-soft:#a6a5c1; --ink-faint:#6d6c88;
+    --border:#2a2940; --border-strong:#38375074;
+    --accent:#a29dff; --accent-ink:#c3bfff; --accent-soft:#211f42;
+    --bad:#f18a97; --bad-ink:#f7abb4; --bad-bg:#2a1620; --bad-border:#48222e;
+    --good:#63d59a; --good-ink:#8fe3b6; --good-bg:#0f2419; --good-border:#204536;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 30px -16px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.6;font-size:16px;letter-spacing:-.005em;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:940px;margin:0 auto;padding:0 24px}
+  a{color:var(--accent-ink);text-underline-offset:2px}
+
+  /* ---- Header ---- */
+  header{padding:72px 0 40px;border-bottom:1px solid var(--border)}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--accent-ink);font-weight:600;margin:0 0 18px;display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--accent);border-radius:2px;display:inline-block}
+  h1{
+    font-size:clamp(2.1rem,6vw,3.4rem);line-height:1.02;margin:0;font-weight:800;
+    letter-spacing:-.03em;text-wrap:balance;
+  }
+  h1 .thin{font-weight:400;color:var(--ink-soft)}
+  .lede{font-size:clamp(1.02rem,2.4vw,1.18rem);color:var(--ink-soft);max-width:60ch;margin:22px 0 0;text-wrap:pretty}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+  .chip{
+    font-family:var(--mono);font-size:12px;color:var(--ink-soft);
+    background:var(--surface);border:1px solid var(--border);border-radius:999px;
+    padding:6px 12px;display:inline-flex;align-items:center;gap:7px;
+  }
+  .chip b{color:var(--ink);font-weight:600}
+
+  /* ---- Sections ---- */
+  section{padding:56px 0;border-bottom:1px solid var(--border)}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin:0 0 28px}
+  .sec-num{font-family:var(--mono);font-size:13px;color:var(--accent-ink);font-weight:600;padding-top:4px}
+  h2{font-size:clamp(1.4rem,3.5vw,1.9rem);margin:0;font-weight:750;letter-spacing:-.02em;text-wrap:balance}
+  .sec-sub{color:var(--ink-soft);margin:8px 0 0;max-width:64ch}
+
+  /* ---- Principle cards ---- */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+  .card{
+    background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 20px;
+    box-shadow:var(--shadow);
+  }
+  .card h3{margin:0 0 8px;font-size:1.02rem;font-weight:700;letter-spacing:-.01em}
+  .card p{margin:0;font-size:.92rem;color:var(--ink-soft)}
+  .card .k{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink);display:block;margin-bottom:12px;font-weight:600}
+
+  /* ---- Rules list ---- */
+  ol.rules{list-style:none;counter-reset:r;margin:0;padding:0;display:grid;gap:12px}
+  ol.rules li{
+    counter-increment:r;position:relative;padding:16px 18px 16px 56px;
+    background:var(--surface);border:1px solid var(--border);border-radius:12px;font-size:.95rem;
+  }
+  ol.rules li::before{
+    content:counter(r,decimal-leading-zero);position:absolute;left:16px;top:16px;
+    font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent-ink);
+    background:var(--accent-soft);border-radius:7px;width:26px;height:24px;display:grid;place-items:center;
+  }
+  ol.rules b{font-weight:700}
+  code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);padding:1px 6px;border-radius:5px;color:var(--ink)}
+
+  /* ---- Glossary table ---- */
+  .tablewrap{overflow-x:auto;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
+  table{border-collapse:collapse;width:100%;min-width:520px;font-size:.92rem}
+  thead th{
+    text-align:left;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink-faint);font-weight:600;padding:14px 18px;border-bottom:1px solid var(--border-strong);
+  }
+  tbody td{padding:14px 18px;border-bottom:1px solid var(--border);vertical-align:top}
+  tbody tr:last-child td{border-bottom:none}
+  td.use{color:var(--good-ink);font-weight:600}
+  td.avoid{color:var(--ink-faint)}
+  td.avoid s{text-decoration-color:var(--bad)}
+
+  /* ---- Before / After ---- */
+  .cat{margin:34px 0 16px;display:flex;align-items:center;gap:12px}
+  .cat span{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);font-weight:600}
+  .cat::after{content:"";flex:1;height:1px;background:var(--border)}
+  .cat:first-of-type{margin-top:6px}
+  .ba{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+  .panel{border-radius:13px;padding:16px 18px;border:1px solid;position:relative}
+  .panel.before{background:var(--bad-bg);border-color:var(--bad-border)}
+  .panel.after{background:var(--good-bg);border-color:var(--good-border)}
+  .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:7px;margin-bottom:10px}
+  .before .tag{color:var(--bad-ink)}
+  .after .tag{color:var(--good-ink)}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .before .dot{background:var(--bad)}
+  .after .dot{background:var(--good)}
+  .str{font-size:.95rem;color:var(--ink);line-height:1.5}
+  .before .str{color:var(--bad-ink)}
+  .note{font-size:.82rem;color:var(--ink-faint);margin:0 0 22px;padding-left:2px}
+  .note b{color:var(--ink-soft);font-weight:600}
+
+  /* ---- Summary stats ---- */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:26px}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;box-shadow:var(--shadow)}
+  .stat .n{font-size:2rem;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:var(--accent-ink)}
+  .stat .l{font-size:.84rem;color:var(--ink-soft);margin-top:4px}
+  .callout{background:var(--surface-3);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;padding:16px 18px;font-size:.92rem;color:var(--ink-soft)}
+  .callout b{color:var(--ink)}
+  .callout code{background:var(--surface-2)}
+
+  footer{padding:40px 0 64px;color:var(--ink-faint);font-size:.85rem}
+
+  @media (max-width:620px){
+    header{padding:48px 0 32px}
+    .ba{grid-template-columns:1fr}
+    .sec-head{flex-direction:column;gap:4px}
+    section{padding:44px 0}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .panel{transition:transform .15s ease}
+    .panel.after:hover{transform:translateY(-2px)}
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Panduan UX Copy</p>
+    <h1>E&#8209;Absensi <span class="thin">— gaya penulisan antarmuka</span></h1>
+    <p class="lede">Aturan menulis setiap teks yang dilihat guru, admin, dan siswa —
+      supaya pesan aplikasi terdengar tenang, konsisten, dan jelas. Disertai daftar
+      <b>sebelum &rarr; sesudah</b> yang sudah diterapkan ke kode.</p>
+    <div class="meta">
+      <span class="chip"><b>Cakupan</b> code.gs &middot; index.html</span>
+      <span class="chip"><b>Bahasa</b> Indonesia</span>
+      <span class="chip"><b>Diterapkan</b> 2026&#8209;08&#8209;13</span>
+    </div>
+  </header>
+
+  <!-- 1. Voice & tone -->
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span>
+      <div><h2>Suara &amp; nada</h2>
+      <p class="sec-sub">Dipakai kepala sekolah, guru, admin, dan siswa. Teks harus terasa membantu — bukan menyalahkan.</p></div>
+    </div>
+    <div class="cards">
+      <div class="card"><span class="k">Tenang</span><h3>Jangan berteriak</h3><p>Tak ada <code>DITUTUP</code> atau <code>GAGAL!</code>. Sampaikan keadaan, lalu langkah berikutnya.</p></div>
+      <div class="card"><span class="k">Sopan</span><h3>Sapa "Anda"</h3><p>Untuk guru &amp; admin, nada profesional. Untuk siswa saat scan: singkat dan memberi semangat.</p></div>
+      <div class="card"><span class="k">Jujur</span><h3>Bukan bahasa mesin</h3><p>Pengguna tak perlu melihat <code>error.toString()</code>, <code>token</code>, atau nama fungsi.</p></div>
+      <div class="card"><span class="k">Solutif</span><h3>Selalu ada jalan</h3><p>Setiap error menjelaskan <b>apa yang salah</b> dan <b>apa yang harus dilakukan</b>.</p></div>
+    </div>
+  </section>
+
+  <!-- 2. Mechanical rules -->
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span>
+      <div><h2>Aturan mekanis</h2>
+      <p class="sec-sub">Delapan aturan yang membuat teks konsisten di seluruh aplikasi.</p></div>
+    </div>
+    <ol class="rules">
+      <li><b>Kapitalisasi kalimat.</b> Tanpa HURUF KAPITAL untuk menekankan. Pengecualian: label ringkas HUD pemindai QR (<code>SCAN QR PULANG</code>) — itu label alat, bukan pesan.</li>
+      <li><b>Tanda baca.</b> Kalimat lengkap diakhiri titik. Maksimal satu tanda seru, hanya untuk kabar baik singkat.</li>
+      <li><b>Ikon lewat komponen UI.</b> Jangan tempel <code>&check;</code>/<code>&times;</code> di dalam teks pesan.</li>
+      <li><b>Jangan bocorkan error mentah.</b> Bungkus manusiawi; detail teknis boleh disisakan dalam kurung untuk debugging.</li>
+      <li><b>Bahasa baku &amp; hangat.</b> <code>diperbarui</code> bukan "diupdate"; <code>impor</code> bukan "import"; <code>masuk</code> bukan "login".</li>
+      <li><b>Error = masalah + solusi.</b> Beri tahu penyebab dan langkah perbaikannya.</li>
+      <li><b>Satu konsep, satu istilah.</b> Ikuti glosarium di bawah.</li>
+      <li><b>Titik waktu pakai "pukul HH:MM".</b> Bukan "jam 07:15".</li>
+    </ol>
+  </section>
+
+  <!-- 3. Glossary -->
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span>
+      <div><h2>Glosarium istilah baku</h2>
+      <p class="sec-sub">Satu konsep punya satu istilah resmi. Ini menghapus tiga varian "NISN tidak ada" menjadi satu.</p></div>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Konsep</th><th>Gunakan</th><th>Hindari</th></tr></thead>
+        <tbody>
+          <tr><td>NISN tidak ada di data</td><td class="use">NISN tidak terdaftar</td><td class="avoid"><s>tidak ditemukan</s> &middot; <s>tidak terdaftar di database</s></td></tr>
+          <tr><td>Menyimpan perubahan data</td><td class="use">diperbarui</td><td class="avoid"><s>diupdate</s> &middot; <s>diedit</s></td></tr>
+          <tr><td>Memasukkan data dari file</td><td class="use">impor</td><td class="avoid"><s>import</s></td></tr>
+          <tr><td>Masuk ke akun</td><td class="use">masuk</td><td class="avoid"><s>login</s></td></tr>
+          <tr><td>Aksi tidak diizinkan</td><td class="use">tidak memiliki akses</td><td class="avoid"><s>Akses Ditolak:</s> &middot; <s>Ditolak!</s></td></tr>
+          <tr><td>Titik waktu</td><td class="use">pukul 07:15</td><td class="avoid"><s>jam 07:15</s></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note" style="margin-top:16px"><b>Sengaja dipertahankan:</b> token status yang disimpan ke spreadsheet &amp; dipakai logika — <code>Terlambat</code>, <code>Pulang Cepat</code>, <code>Tepat Waktu</code>, <code>Hadir</code>. Mengubahnya merusak pengecekan data &amp; histori.</p>
+  </section>
+
+  <!-- 4. Before / After -->
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span>
+      <div><h2>Sebelum &rarr; sesudah</h2>
+      <p class="sec-sub">Contoh nyata yang sudah diterapkan. Kiri merah = versi lama; kanan hijau = versi baru.</p></div>
+    </div>
+
+    <div class="cat"><span>Error teknis yang bocor ke pengguna</span></div>
+    <div class="ba">
+      <div class="panel before"><div class="tag"><span class="dot"></span>Sebelum</div><div class="str">"Login Error: " + error.toString()</div></div>
+      <div class="panel after"><div class="tag"><span class="dot"></span>Sesudah</div><div class="str">Gagal masuk. Silakan coba lagi sebentar. (&hellip;)</div></div>
+    </div>
+    <p class="note"><b>Aturan 4.</b> Pesan manusiawi di depan; detail teknis disimpan dalam kurung.</p>
+    <div class="ba">
+      <div class="panel before"><div class="tag"><span class="dot"></span>Sebelum</div><div class="str">message: error.toString()  <span style="opacity:.7">// dump mentah</span></div></div>
+      <div class="panel after"><div class="tag"><span class="dot"></span>Sesudah</div><div class="str">Terjadi kesalahan. Silakan coba lagi. (&hellip;)</div></div>
+    </div>
+    <p class="note"><b>±30 blok <code>catch</code></b> yang tadinya menampilkan stack error kini aman.</p>
+
+    <div class="cat"><span>Konsistensi istilah &mdash; NISN</span></div>
+    <div class="ba">
+      <div class="panel before"><div class="tag"><span class="dot"></span>Sebelum &mdash; 3 varian</div><div class="str">NISN tidak ditemukan<br>NISN tidak terdaftar<br>NISN tidak terdaftar di database.</div></div>
+      <div class="panel after"><div class="tag"><span class="dot"></span>Sesudah &mdash; 1 istilah</div><div class="str">NISN tidak terdaftar.<br><span style="color:var(--ink-faint)">(+ "Periksa kembali nomornya." saat masuk)</span></div></div>
+    </div>
+    <p class="note"><b>Aturan 7.</b> Satu konsep, satu istilah.</p>
+
+    <div class="cat"><span>Absensi ditutup &amp; batas waktu</span></div>
+    <div class="ba">
+      <div class="panel before"><div class="tag"><span class="dot"></span>Sebelum</div><div class="str">Absensi DITUTUP. Hari ini libur rutin: Hari Minggu</div></div>
+      <div class="panel after"><div class="tag"><span class="dot"></span>Sesudah</div><div class="str">Absensi ditutup. Hari ini libur: Minggu.</div></div>
+    </div>
+    <div class="ba">
+      <div class="panel before"><div class="tag"><span class="dot"></span>Sebelum</div><div class="str">Gagal! Batas waktu pulang (17:00) sudah lewat.</div></div>
+      <div class="panel after"><div class="tag"><span class="dot"></span>Sesudah</div><div class="str">Sudah melewati batas absen pulang (17:00).</div></div>
+    </div>
+    <p class="note"><b>Aturan 1 &amp; 2.</b> Berhenti berteriak; hilangkan "Gagal!" yang mengejutkan.</p>
+
+    <div class="cat"><span>Pesan sukses</span></div>
+    <div class="ba">
+      <div class="panel before"><div class="tag"><span class="dot"></span>Sebelum</div><div class="str">Absen Sholat Berhasil &check;<br>Siswa berhasil ditambahkan (Aman)<br>Siswa berhasil diupdate</div></div>
+      <div class="panel after"><div class="tag"><span class="dot"></span>Sesudah</div><div class="str">Absen sholat berhasil.<br>Siswa berhasil ditambahkan.<br>Data siswa berhasil diperbarui.</div></div>
+    </div>
+    <p class="note"><b>Aturan 3 &amp; 5.</b> Ikon lepas dari teks; catatan internal "(Aman)" dibuang; "diupdate" &rarr; "diperbarui".</p>
+
+    <div class="cat"><span>Nada penolakan &amp; sesi</span></div>
+    <div class="ba">
+      <div class="panel before"><div class="tag"><span class="dot"></span>Sebelum</div><div class="str">Ditolak! Siswa ini kelas X. Anda hanya bisa scan kelas Y.</div></div>
+      <div class="panel after"><div class="tag"><span class="dot"></span>Sesudah</div><div class="str">Siswa ini dari kelas X. Anda hanya dapat melakukan scan untuk kelas Y.</div></div>
+    </div>
+    <div class="ba">
+      <div class="panel before"><div class="tag"><span class="dot"></span>Sebelum</div><div class="str">Sesi berakhir. Silakan login ulang.<br>Token tidak valid atau tidak ditemukan.</div></div>
+      <div class="panel after"><div class="tag"><span class="dot"></span>Sesudah</div><div class="str">Sesi Anda telah berakhir. Silakan masuk kembali.<br>Sesi tidak ditemukan. Silakan masuk kembali.</div></div>
+    </div>
+    <p class="note"><b>Glosarium.</b> "Ditolak!" &amp; "token" hilang dari mata pengguna.</p>
+
+    <div class="cat"><span>Antarmuka &mdash; layar masuk &amp; navigasi</span></div>
+    <div class="ba">
+      <div class="panel before"><div class="tag"><span class="dot"></span>Sebelum</div><div class="str">MASUK SEKARANG &middot; Secure &middot; Fast<br>Prev / Next &middot; Import Excel</div></div>
+      <div class="panel after"><div class="tag"><span class="dot"></span>Sesudah</div><div class="str">Masuk Sekarang &middot; Aman &middot; Cepat<br>Sebelumnya / Berikutnya &middot; Impor Excel</div></div>
+    </div>
+    <p class="note"><b>Aturan 1 &amp; 5.</b> Hilangkan kapital berlebih dan istilah Inggris yang bocor.</p>
+  </section>
+
+  <!-- 5. Summary -->
+  <section>
+    <div class="sec-head"><span class="sec-num">05</span>
+      <div><h2>Ringkasan perubahan</h2>
+      <p class="sec-sub">Yang sudah diterapkan ke berkas, dan yang sengaja dibiarkan.</p></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n">±80</div><div class="l">pesan server di <code>code.gs</code> ditulis ulang</div></div>
+      <div class="stat"><div class="n">~30</div><div class="l">error mentah kini dibungkus aman</div></div>
+      <div class="stat"><div class="n">18&times;</div><div class="l">teks antarmuka dilokalkan di <code>index.html</code></div></div>
+      <div class="stat"><div class="n">100%</div><div class="l"><code>node --check</code> lulus &middot; struktur tag seimbang</div></div>
+    </div>
+    <div class="callout">
+      <b>Prinsip aman:</b> tidak ada logika yang bergantung pada isi teks pesan — antarmuka
+      bercabang pada <code>type</code>/<code>success</code>, bukan kata. Karena itu penulisan
+      ulang tak mengubah perilaku. Token status penyimpan data (<code>Terlambat</code>,
+      <code>Pulang Cepat</code>, <code>Hadir</code>) dan label HUD pemindai QR tetap dipertahankan.
+    </div>
+  </section>
+
+  <footer>
+    Panduan UX Copy E&#8209;Absensi &middot; disusun untuk menjaga konsistensi teks antarmuka.
+    Daftar lengkap sebelum&rarr;sesudah ada di <code>PANDUAN-UX-COPY.md</code>.
+  </footer>
+</div>
