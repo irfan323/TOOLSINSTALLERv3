@@ -180,9 +180,32 @@ tailwind.config = {
   .fitur-baris { transition:transform .2s, background-color .2s; border-radius:12px; padding:6px 8px; margin:0 -8px; }
   .fitur-baris:hover { transform:translateX(4px); background:rgba(255,255,255,.06); }
 
+  /* Partikel melayang naik */
+  @keyframes partikelNaik {
+    0%   { transform:translateY(0) translateX(0); opacity:0; }
+    12%  { opacity:var(--op,.4); }
+    88%  { opacity:var(--op,.4); }
+    100% { transform:translateY(-110vh) translateX(var(--drift,20px)); opacity:0; }
+  }
+  .partikel {
+    position:absolute; bottom:-10px; border-radius:50%;
+    background:#10b981; box-shadow:0 0 8px rgba(16,185,129,.75); opacity:0;
+    animation-name:partikelNaik; animation-timing-function:linear; animation-iteration-count:infinite;
+    will-change:transform, opacity;
+  }
+
+  /* Caret efek ketik pada judul */
+  @keyframes kedipKaret { 0%,100%{opacity:1} 50%{opacity:0} }
+  .karet-ketik {
+    display:inline-block; width:2px; height:1.02em; margin-left:3px; vertical-align:-2px;
+    background:#10b981; border-radius:2px; animation:kedipKaret 1s step-end infinite;
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .aurora, .kartu-masuk, .masuk-tampil, .masuk-sisi, .logo-denyut::before, .logo-denyut::after, .judul-gradasi { animation:none !important; }
+    .aurora, .kartu-masuk, .masuk-tampil, .masuk-sisi, .logo-denyut::before, .logo-denyut::after,
+    .judul-gradasi, .partikel, .karet-ketik { animation:none !important; }
     .masuk-tampil, .masuk-sisi { opacity:1 !important; }
+    .partikel { display:none !important; }
   }
 </style>
 </head>
@@ -197,8 +220,9 @@ tailwind.config = {
   <div class="absolute inset-0 overflow-hidden pointer-events-none">
     <div class="aurora" style="width:46vw;height:46vw;top:-12%;left:-8%;background:#3363ff;animation:auroraKe 16s ease-in-out infinite, orbAmbang 9s ease-in-out infinite;"></div>
     <div class="aurora" style="width:40vw;height:40vw;bottom:-14%;right:-8%;background:#1a33b4;animation:auroraKe 20s ease-in-out infinite reverse, orbAmbang 11s ease-in-out infinite;"></div>
-    <div class="aurora" style="width:26vw;height:26vw;top:36%;left:52%;background:#22d3ee;opacity:.26;animation:orbAmbang 13s ease-in-out infinite;"></div>
+    <div class="aurora" style="width:26vw;height:26vw;top:36%;left:52%;background:#10b981;opacity:.24;animation:orbAmbang 13s ease-in-out infinite;"></div>
     <div class="absolute inset-0" style="opacity:.07;background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:46px 46px;animation:petakGeser 6s linear infinite;"></div>
+    <div id="partikelMasuk" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
     <div class="absolute inset-0" style="background:radial-gradient(circle at 50% 40%, transparent 32%, rgba(10,15,40,.6) 100%);"></div>
   </div>
 
@@ -262,7 +286,7 @@ tailwind.config = {
         </div>
       </div>
 
-      <h2 class="text-2xl font-extrabold masuk-tampil" style="animation-delay:.16s"><span class="judul-gradasi">Masuk ke sistem</span></h2>
+      <h2 class="text-2xl font-extrabold masuk-tampil" style="animation-delay:.16s"><span id="judulKetik" class="judul-gradasi">Masuk ke sistem</span><span class="karet-ketik" aria-hidden="true"></span></h2>
       <p class="text-sm text-slate-500 mt-1 mb-6 masuk-tampil" style="animation-delay:.22s">Pilih jenis akun Anda untuk melanjutkan.</p>
 
       <div class="flex gap-1.5 p-1 bg-slate-100 rounded-xl mb-6 masuk-tampil" style="animation-delay:.28s" role="tablist">
@@ -602,6 +626,7 @@ function paksaKeluar(pesan) {
   el('aplikasi').classList.add('hidden');
   el('halamanMasuk').classList.remove('hidden');
   if (pesan) galatMasuk(pesan);
+  efekKetik();
 }
 
 /* ==================================================================
@@ -705,6 +730,51 @@ function opsiBatch(terpilih, labelSemua) {
              esc(b.nama) + ' (' + esc(b.kode) + ')</option>';
     }).join('');
 }
+
+/* ---------- Efek visual halaman masuk ---------- */
+function gerakDikurangi() {
+  return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+
+/* Partikel emerald melayang naik pada latar login. */
+let waktuKetik = null;
+function buatPartikelMasuk() {
+  const w = el('partikelMasuk');
+  if (!w || w.childElementCount || gerakDikurangi()) return;
+  const n = window.innerWidth < 640 ? 18 : 34;
+  let html = '';
+  for (let i = 0; i < n; i++) {
+    const size  = (Math.random() * 4 + 2).toFixed(1);
+    const left  = (Math.random() * 100).toFixed(2);
+    const dur   = (Math.random() * 10 + 8).toFixed(1);
+    const delay = (Math.random() * 12).toFixed(1);
+    const drift = (Math.random() * 60 - 30).toFixed(0);
+    const op    = (Math.random() * 0.35 + 0.25).toFixed(2);
+    html += '<span class="partikel" style="left:' + left + '%;width:' + size + 'px;height:' + size +
+            'px;--drift:' + drift + 'px;--op:' + op + ';animation-duration:' + dur +
+            's;animation-delay:' + delay + 's;"></span>';
+  }
+  w.innerHTML = html;
+}
+
+/* Efek ketik pada judul "Masuk ke sistem". */
+function efekKetik() {
+  const t = el('judulKetik');
+  if (!t) return;
+  const teks = 'Masuk ke sistem';
+  clearTimeout(waktuKetik);
+  if (gerakDikurangi()) { t.textContent = teks; return; }
+  t.textContent = '';
+  let i = 0;
+  (function ketik() {
+    t.textContent = teks.slice(0, i);
+    if (i++ < teks.length) waktuKetik = setTimeout(ketik, 85);
+  })();
+}
+
+function initEfekMasuk() { buatPartikelMasuk(); efekKetik(); }
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initEfekMasuk);
+else initEfekMasuk();
 
 /* Pulihkan sesi bila halaman dimuat ulang */
 window.addEventListener('load', function () {
