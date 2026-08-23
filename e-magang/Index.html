@@ -132,6 +132,58 @@ tailwind.config = {
   .sel-x { background:#f8fafc; color:#94a3b8; }
   .matriks td, .matriks th { text-align:center; font-size:11px; padding:5px 3px !important; }
   .matriks td.kiri, .matriks th.kiri { text-align:left; }
+
+  /* ================= Animasi Halaman Masuk ================= */
+  @keyframes auroraKe    { 0%{transform:translate3d(-8%,-6%,0) scale(1)} 50%{transform:translate3d(8%,6%,0) scale(1.18)} 100%{transform:translate3d(-8%,-6%,0) scale(1)} }
+  @keyframes orbAmbang   { 0%,100%{transform:translateY(0) translateX(0)} 50%{transform:translateY(-30px) translateX(16px)} }
+  @keyframes petakGeser  { from{background-position:0 0} to{background-position:46px 46px} }
+  @keyframes masukNaik   { 0%{opacity:0; transform:translateY(20px)} 100%{opacity:1; transform:translateY(0)} }
+  @keyframes masukSisi   { 0%{opacity:0; transform:translateX(-16px)} 100%{opacity:1; transform:translateX(0)} }
+  @keyframes kilapBtn    { 0%{transform:translateX(-130%)} 60%,100%{transform:translateX(260%)} }
+  @keyframes cincinDenyut{ 0%{transform:scale(.85); opacity:.65} 70%{transform:scale(1.7); opacity:0} 100%{opacity:0} }
+  @keyframes tulisanGeser{ to{background-position:200% center} }
+  @keyframes kartuMuncul { 0%{opacity:0; transform:translateY(26px) scale(.985)} 100%{opacity:1; transform:none} }
+
+  .aurora { position:absolute; border-radius:50%; filter:blur(64px); opacity:.5; will-change:transform; pointer-events:none; }
+  .kartu-masuk  { animation:kartuMuncul .7s cubic-bezier(.2,.75,.2,1) both; }
+  .masuk-tampil { opacity:0; animation:masukNaik .6s cubic-bezier(.2,.75,.2,1) forwards; }
+  .masuk-sisi   { opacity:0; animation:masukSisi .6s cubic-bezier(.2,.75,.2,1) forwards; }
+
+  .logo-denyut { position:relative; }
+  .logo-denyut::before, .logo-denyut::after {
+    content:''; position:absolute; inset:0; border-radius:inherit;
+    border:2px solid rgba(147,197,253,.55); animation:cincinDenyut 2.6s ease-out infinite;
+  }
+  .logo-denyut::after { animation-delay:1.3s; }
+
+  .btn-kilap { position:relative; overflow:hidden; }
+  .btn-kilap::after {
+    content:''; position:absolute; top:0; left:0; width:45%; height:100%;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,.55), transparent);
+    transform:translateX(-130%);
+  }
+  .btn-kilap:hover:not(:disabled)::after { animation:kilapBtn 1s ease; }
+  .btn-kilap:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 12px 26px rgba(29,63,224,.38); }
+  .btn-gradasi { background:linear-gradient(100deg,#1d3fe0,#3363ff 55%,#598cff) !important; }
+
+  .judul-gradasi {
+    display:inline-block;
+    background:linear-gradient(90deg,#1d3fe0,#598cff,#8eb5ff,#1d3fe0);
+    background-size:200% auto; -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:tulisanGeser 5s linear infinite;
+  }
+
+  #halamanMasuk [role="tablist"] button { transition:background-color .2s, color .2s, box-shadow .2s; }
+  #halamanMasuk .relative:focus-within > i { color:#1d3fe0; }
+  #halamanMasuk .input { transition:border-color .15s, box-shadow .15s, transform .15s; }
+  #halamanMasuk .input:focus { transform:translateY(-1px); }
+  .fitur-baris { transition:transform .2s, background-color .2s; border-radius:12px; padding:6px 8px; margin:0 -8px; }
+  .fitur-baris:hover { transform:translateX(4px); background:rgba(255,255,255,.06); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .aurora, .kartu-masuk, .masuk-tampil, .masuk-sisi, .logo-denyut::before, .logo-denyut::after, .judul-gradasi { animation:none !important; }
+    .masuk-tampil, .masuk-sisi { opacity:1 !important; }
+  }
 </style>
 </head>
 <body class="text-slate-900">
@@ -140,16 +192,24 @@ tailwind.config = {
      HALAMAN MASUK
      ================================================================ -->
 <div id="halamanMasuk" class="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-dinas-950">
-  <div class="absolute inset-0 opacity-25"
-       style="background-image:radial-gradient(circle at 15% 20%, #3363ff 0, transparent 45%), radial-gradient(circle at 85% 80%, #1a33b4 0, transparent 45%);"></div>
 
-  <div class="relative w-full max-w-5xl grid lg:grid-cols-2 gap-0 rounded-3xl overflow-hidden shadow-2xl">
+  <!-- Latar animasi: aurora + grid + vignette -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="aurora" style="width:46vw;height:46vw;top:-12%;left:-8%;background:#3363ff;animation:auroraKe 16s ease-in-out infinite, orbAmbang 9s ease-in-out infinite;"></div>
+    <div class="aurora" style="width:40vw;height:40vw;bottom:-14%;right:-8%;background:#1a33b4;animation:auroraKe 20s ease-in-out infinite reverse, orbAmbang 11s ease-in-out infinite;"></div>
+    <div class="aurora" style="width:26vw;height:26vw;top:36%;left:52%;background:#22d3ee;opacity:.26;animation:orbAmbang 13s ease-in-out infinite;"></div>
+    <div class="absolute inset-0" style="opacity:.07;background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:46px 46px;animation:petakGeser 6s linear infinite;"></div>
+    <div class="absolute inset-0" style="background:radial-gradient(circle at 50% 40%, transparent 32%, rgba(10,15,40,.6) 100%);"></div>
+  </div>
+
+  <div class="kartu-masuk relative w-full max-w-5xl grid lg:grid-cols-2 gap-0 rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10">
 
     <!-- Panel identitas instansi -->
-    <div class="hidden lg:flex flex-col justify-between p-10 bg-gradient-to-br from-dinas-900 to-dinas-950 text-white">
-      <div>
-        <div class="flex items-center gap-3 mb-8">
-          <div class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center">
+    <div class="hidden lg:flex flex-col justify-between p-10 bg-gradient-to-br from-dinas-900 to-dinas-950 text-white relative overflow-hidden">
+      <div class="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-dinas-500/20 blur-3xl pointer-events-none"></div>
+      <div class="relative">
+        <div class="flex items-center gap-3 mb-8 masuk-sisi" style="animation-delay:.15s">
+          <div class="logo-denyut w-12 h-12 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center">
             <i class="fas fa-fingerprint text-xl"></i>
           </div>
           <div>
@@ -157,32 +217,32 @@ tailwind.config = {
             <div class="text-[11px] text-dinas-200/70">Absensi Digital Magang Nasional</div>
           </div>
         </div>
-        <h1 class="text-2xl font-extrabold leading-snug mb-3">
+        <h1 class="text-2xl font-extrabold leading-snug mb-3 masuk-sisi" style="animation-delay:.25s">
           Satuan Pelayanan Pelatihan Vokasi dan Produktivitas Mamuju
         </h1>
-        <p class="text-sm text-dinas-200/80 leading-relaxed">
+        <p class="text-sm text-dinas-200/80 leading-relaxed masuk-sisi" style="animation-delay:.32s">
           Balai Besar Pelatihan Vokasi dan Produktivitas Makassar<br>
           Kementerian Ketenagakerjaan Republik Indonesia
         </p>
       </div>
 
-      <div class="space-y-3 mt-10">
-        <div class="flex gap-3 items-start text-sm">
+      <div class="space-y-2 mt-10 relative">
+        <div class="fitur-baris flex gap-3 items-start text-sm masuk-sisi" style="animation-delay:.40s">
           <i class="fas fa-location-crosshairs mt-1 text-dinas-300"></i>
           <div><div class="font-semibold">Geofence titik koordinat</div>
                <div class="text-xs text-dinas-200/70">Jarak dihitung di server, bukan di perangkat.</div></div>
         </div>
-        <div class="flex gap-3 items-start text-sm">
+        <div class="fitur-baris flex gap-3 items-start text-sm masuk-sisi" style="animation-delay:.48s">
           <i class="fas fa-camera-retro mt-1 text-dinas-300"></i>
           <div><div class="font-semibold">Swafoto berwatermark</div>
                <div class="text-xs text-dinas-200/70">Nama, waktu, dan koordinat tercetak pada foto.</div></div>
         </div>
-        <div class="flex gap-3 items-start text-sm">
+        <div class="fitur-baris flex gap-3 items-start text-sm masuk-sisi" style="animation-delay:.56s">
           <i class="fas fa-shield-halved mt-1 text-dinas-300"></i>
           <div><div class="font-semibold">Deteksi lokasi palsu</div>
                <div class="text-xs text-dinas-200/70">Skor risiko menandai indikasi fake GPS.</div></div>
         </div>
-        <div class="flex gap-3 items-start text-sm">
+        <div class="fitur-baris flex gap-3 items-start text-sm masuk-sisi" style="animation-delay:.64s">
           <i class="fas fa-calendar-week mt-1 text-dinas-300"></i>
           <div><div class="font-semibold">Pola 5 hari kerja</div>
                <div class="text-xs text-dinas-200/70">Senin–Kamis 07.30–16.00, Jumat 07.30–16.30 WITA.</div></div>
@@ -191,9 +251,9 @@ tailwind.config = {
     </div>
 
     <!-- Panel formulir -->
-    <div class="bg-white p-8 sm:p-10 flex flex-col justify-center">
-      <div class="lg:hidden flex items-center gap-3 mb-7">
-        <div class="w-11 h-11 rounded-2xl bg-dinas-600 text-white flex items-center justify-center">
+    <div class="bg-white/95 backdrop-blur-xl p-8 sm:p-10 flex flex-col justify-center">
+      <div class="lg:hidden flex items-center gap-3 mb-7 masuk-tampil" style="animation-delay:.10s">
+        <div class="logo-denyut w-11 h-11 rounded-2xl bg-dinas-600 text-white flex items-center justify-center">
           <i class="fas fa-fingerprint"></i>
         </div>
         <div>
@@ -202,10 +262,10 @@ tailwind.config = {
         </div>
       </div>
 
-      <h2 class="text-xl font-extrabold text-slate-900">Masuk ke sistem</h2>
-      <p class="text-sm text-slate-500 mt-1 mb-6">Pilih jenis akun Anda untuk melanjutkan.</p>
+      <h2 class="text-2xl font-extrabold masuk-tampil" style="animation-delay:.16s"><span class="judul-gradasi">Masuk ke sistem</span></h2>
+      <p class="text-sm text-slate-500 mt-1 mb-6 masuk-tampil" style="animation-delay:.22s">Pilih jenis akun Anda untuk melanjutkan.</p>
 
-      <div class="flex gap-1.5 p-1 bg-slate-100 rounded-xl mb-6" role="tablist">
+      <div class="flex gap-1.5 p-1 bg-slate-100 rounded-xl mb-6 masuk-tampil" style="animation-delay:.28s" role="tablist">
         <button id="tabPeserta" onclick="gantiTabMasuk('peserta')"
                 class="flex-1 py-2 rounded-lg text-[13px] font-semibold bg-white shadow-sm text-slate-900">
           <i class="fas fa-user-graduate mr-1.5"></i>Peserta
@@ -216,7 +276,7 @@ tailwind.config = {
         </button>
       </div>
 
-      <form onsubmit="event.preventDefault(); prosesMasuk();">
+      <form onsubmit="event.preventDefault(); prosesMasuk();" class="masuk-tampil" style="animation-delay:.34s">
         <div id="formPeserta">
           <label class="label">Nomor Registrasi Peserta Magang</label>
           <div class="relative">
@@ -255,12 +315,12 @@ tailwind.config = {
           <i class="fas fa-circle-exclamation mt-0.5"></i><span id="galatMasukTeks"></span>
         </div>
 
-        <button id="tombolMasuk" type="submit" class="btn btn-utama w-full mt-6 py-3">
+        <button id="tombolMasuk" type="submit" class="btn btn-utama btn-gradasi btn-kilap w-full mt-6 py-3">
           <span id="labelMasuk">Masuk</span><i class="fas fa-arrow-right-to-bracket"></i>
         </button>
       </form>
 
-      <p class="text-[11px] text-slate-400 text-center mt-7 leading-relaxed">
+      <p class="text-[11px] text-slate-400 text-center mt-7 leading-relaxed masuk-tampil" style="animation-delay:.40s">
         Sistem ini merekam titik koordinat dan swafoto sebagai bukti kehadiran.<br>
         Penyalahgunaan akun dapat dikenakan sanksi sesuai ketentuan program magang.
       </p>
