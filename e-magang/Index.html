@@ -819,18 +819,17 @@ function blokAlurAbsensi(j) {
       '<div id="langkah2" class="langkah"><div class="langkah-nomor">2</div><div class="flex-1 min-w-0">' +
         '<div class="flex items-center justify-between gap-2 mb-1">' +
           '<div class="text-sm font-bold text-slate-900">Ambil swafoto</div>' +
-          '<button id="tombolKamera" onclick="nyalakanKamera()" class="btn btn-halus btn-kecil" disabled>' +
-            '<i class="fas fa-camera"></i>Buka kamera</button>' +
+          '<button id="tombolKamera" onclick="bukaKameraPerangkat()" class="btn btn-utama btn-kecil" disabled>' +
+            '<i class="fas fa-camera"></i>Buka kamera HP</button>' +
         '</div>' +
         '<div id="statusKamera" class="text-xs text-slate-500">Aktif setelah lokasi terverifikasi.</div>' +
+        '<input id="inputKameraFile" type="file" accept="image/*" capture="user" ' +
+               'class="hidden" onchange="fotoDariFile(event)">' +
         '<div id="barisFallbackKamera" class="hidden mt-2">' +
-          '<label class="btn btn-utama btn-kecil cursor-pointer inline-flex">' +
-            '<i class="fas fa-mobile-screen-button"></i>Kamera perangkat (disarankan)' +
-            '<input id="inputKameraFile" type="file" accept="image/*" capture="user" ' +
-                   'class="hidden" onchange="fotoDariFile(event)">' +
-          '</label>' +
-          '<p class="text-[11px] text-slate-500 mt-1">Tombol ini membuka kamera bawaan HP. ' +
-          'Pakai ini jika popup izin kamera tidak muncul atau pratinjau gagal tampil.</p>' +
+          '<button onclick="nyalakanKamera()" class="text-[11px] text-dinas-600 underline">' +
+            'Coba kamera langsung (pratinjau real-time)</button>' +
+          '<p class="text-[11px] text-slate-500 mt-1">Tombol biru "Buka kamera HP" memakai kamera bawaan ponsel ' +
+          'dan paling andal. Pratinjau langsung sering diblokir di dalam Google Apps Script.</p>' +
         '</div>' +
         '<div id="wadahKamera" class="hidden mt-3">' +
           '<div class="relative rounded-xl overflow-hidden bg-slate-900 aspect-[4/3] max-w-sm">' +
@@ -1053,6 +1052,16 @@ function jarakHaversine(lat1, lon1, lat2, lon2) {
    ------------------------------------------------------------------ */
 let aliranKamera = null, kameraDepan = true;
 
+/* Jalur utama: buka kamera bawaan HP lewat input file (tidak tunduk pada
+   Permissions Policy iframe Apps Script). Dipanggil dari tombol biru. */
+function bukaKameraPerangkat() {
+  if (!ST.lokasi || ST.lokasi.diluar) {
+    toast('Verifikasi titik koordinat dulu (Langkah 1).', 'ingat'); return;
+  }
+  const inp = el('inputKameraFile');
+  if (inp) inp.click();
+}
+
 function tampilkanFallbackKamera(pesan, jenis) {
   const bf = el('barisFallbackKamera');
   if (bf) bf.classList.remove('hidden');
@@ -1068,14 +1077,14 @@ function tanganiGalatKamera(err) {
   let pesan;
   if (nama === 'NotAllowedError' || nama === 'SecurityError' || nama === 'PermissionDeniedError') {
     pesan = 'Izin kamera ditolak atau diblokir. Izinkan akses kamera di peramban, ' +
-            'atau gunakan tombol "Kamera perangkat".';
+            'atau pakai tombol biru "Buka kamera HP".';
   } else if (nama === 'NotFoundError' || nama === 'DevicesNotFoundError' || nama === 'OverconstrainedError') {
-    pesan = 'Kamera tidak ditemukan pada perangkat ini. Gunakan tombol "Kamera perangkat".';
+    pesan = 'Kamera tidak ditemukan. Pakai tombol biru "Buka kamera HP".';
   } else if (nama === 'NotReadableError' || nama === 'TrackStartError') {
     pesan = 'Kamera sedang dipakai aplikasi lain. Tutup aplikasi tersebut lalu coba lagi.';
   } else {
     pesan = 'Tidak dapat mengakses kamera langsung' + (nama ? ' (' + nama + ')' : '') +
-            '. Gunakan tombol "Kamera perangkat".';
+            '. Pakai tombol biru "Buka kamera HP".';
   }
   tampilkanFallbackKamera(pesan, 'galat');
 }
@@ -1088,7 +1097,7 @@ function nyalakanKamera() {
     return;
   }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    tampilkanFallbackKamera('Kamera langsung tidak tersedia di konteks ini. Gunakan tombol "Kamera perangkat".', 'ingat');
+    tampilkanFallbackKamera('Kamera langsung tidak tersedia di konteks ini. Pakai tombol biru "Buka kamera HP".', 'ingat');
     return;
   }
   matikanKamera();
