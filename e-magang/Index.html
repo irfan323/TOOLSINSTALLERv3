@@ -824,12 +824,13 @@ function blokAlurAbsensi(j) {
         '</div>' +
         '<div id="statusKamera" class="text-xs text-slate-500">Aktif setelah lokasi terverifikasi.</div>' +
         '<div id="barisFallbackKamera" class="hidden mt-2">' +
-          '<label class="btn btn-abu btn-kecil cursor-pointer inline-flex">' +
-            '<i class="fas fa-mobile-screen-button"></i>Kamera perangkat' +
+          '<label class="btn btn-utama btn-kecil cursor-pointer inline-flex">' +
+            '<i class="fas fa-mobile-screen-button"></i>Kamera perangkat (disarankan)' +
             '<input id="inputKameraFile" type="file" accept="image/*" capture="user" ' +
                    'class="hidden" onchange="fotoDariFile(event)">' +
           '</label>' +
-          '<p class="text-[11px] text-slate-500 mt-1">Gunakan tombol ini bila pratinjau kamera tidak muncul.</p>' +
+          '<p class="text-[11px] text-slate-500 mt-1">Tombol ini membuka kamera bawaan HP. ' +
+          'Pakai ini jika popup izin kamera tidak muncul atau pratinjau gagal tampil.</p>' +
         '</div>' +
         '<div id="wadahKamera" class="hidden mt-3">' +
           '<div class="relative rounded-xl overflow-hidden bg-slate-900 aspect-[4/3] max-w-sm">' +
@@ -1140,6 +1141,7 @@ function fotoDariFile(ev) {
   const berkas = ev.target && ev.target.files && ev.target.files[0];
   ev.target.value = '';                       // izinkan memilih ulang berkas yang sama
   if (!berkas) return;
+  if (!ST.lokasi || ST.lokasi.diluar) { toast('Verifikasi titik koordinat dulu (Langkah 1).', 'ingat'); return; }
   if (!/^image\//.test(berkas.type || '')) { toast('Berkas yang dipilih bukan gambar.', 'galat'); return; }
 
   const url = URL.createObjectURL(berkas);
