@@ -174,9 +174,22 @@ tailwind.config = {
   }
 
   #halamanMasuk [role="tablist"] button { transition:background-color .2s, color .2s, box-shadow .2s; }
-  #halamanMasuk .relative:focus-within > i { color:#1d3fe0; }
-  #halamanMasuk .input { transition:border-color .15s, box-shadow .15s, transform .15s; }
-  #halamanMasuk .input:focus { transform:translateY(-1px); }
+
+  /* Panel formulir kaca gelap — override warna khusus login */
+  #halamanMasuk .label { color:#cbd5e1; }
+  #halamanMasuk .input {
+    background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.16); color:#f1f5f9;
+    transition:border-color .15s, box-shadow .15s, transform .15s, background-color .15s;
+  }
+  #halamanMasuk .input::placeholder { color:#94a3b8; }
+  #halamanMasuk .input:focus {
+    transform:translateY(-1px); border-color:#10b981;
+    box-shadow:0 0 0 3px rgba(16,185,129,.25); background:rgba(255,255,255,.09);
+  }
+  #halamanMasuk .relative:focus-within > i { color:#34d399; }
+  #halamanMasuk .relative > button { color:#94a3b8; }
+  #halamanMasuk .relative > button:hover { color:#e2e8f0; }
+  #halamanMasuk #galatMasuk { background:rgba(239,68,68,.12); border-color:rgba(248,113,113,.4); color:#fecaca; }
   .fitur-baris { transition:transform .2s, background-color .2s; border-radius:12px; padding:6px 8px; margin:0 -8px; }
   .fitur-baris:hover { transform:translateX(4px); background:rgba(255,255,255,.06); }
 
@@ -274,28 +287,28 @@ tailwind.config = {
       </div>
     </div>
 
-    <!-- Panel formulir -->
-    <div class="bg-white/95 backdrop-blur-xl p-8 sm:p-10 flex flex-col justify-center">
+    <!-- Panel formulir (kaca gelap) -->
+    <div class="panel-form bg-dinas-950/55 backdrop-blur-xl p-8 sm:p-10 flex flex-col justify-center lg:border-l border-white/10">
       <div class="lg:hidden flex items-center gap-3 mb-7 masuk-tampil" style="animation-delay:.10s">
         <div class="logo-denyut w-11 h-11 rounded-2xl bg-dinas-600 text-white flex items-center justify-center">
           <i class="fas fa-fingerprint"></i>
         </div>
         <div>
-          <div class="font-extrabold text-base">e-Magang</div>
-          <div class="text-[11px] text-slate-500">Satpel PVP Mamuju</div>
+          <div class="font-extrabold text-base text-white">e-Magang</div>
+          <div class="text-[11px] text-slate-400">Satpel PVP Mamuju</div>
         </div>
       </div>
 
       <h2 class="text-2xl font-extrabold masuk-tampil" style="animation-delay:.16s"><span id="judulKetik" class="judul-gradasi">Masuk ke sistem</span><span class="karet-ketik" aria-hidden="true"></span></h2>
-      <p class="text-sm text-slate-500 mt-1 mb-6 masuk-tampil" style="animation-delay:.22s">Pilih jenis akun Anda untuk melanjutkan.</p>
+      <p class="text-sm text-slate-300 mt-1 mb-6 masuk-tampil" style="animation-delay:.22s">Pilih jenis akun Anda untuk melanjutkan.</p>
 
-      <div class="flex gap-1.5 p-1 bg-slate-100 rounded-xl mb-6 masuk-tampil" style="animation-delay:.28s" role="tablist">
+      <div class="flex gap-1.5 p-1 bg-white/5 ring-1 ring-white/10 rounded-xl mb-6 masuk-tampil" style="animation-delay:.28s" role="tablist">
         <button id="tabPeserta" onclick="gantiTabMasuk('peserta')"
                 class="flex-1 py-2 rounded-lg text-[13px] font-semibold bg-white shadow-sm text-slate-900">
           <i class="fas fa-user-graduate mr-1.5"></i>Peserta
         </button>
         <button id="tabPetugas" onclick="gantiTabMasuk('petugas')"
-                class="flex-1 py-2 rounded-lg text-[13px] font-semibold text-slate-500">
+                class="flex-1 py-2 rounded-lg text-[13px] font-semibold text-slate-300">
           <i class="fas fa-user-shield mr-1.5"></i>Petugas
         </button>
       </div>
@@ -308,7 +321,7 @@ tailwind.config = {
             <input id="inpNoReg" class="input pl-11 font-mono tracking-wide uppercase"
                    placeholder="MN2026001" autocomplete="off">
           </div>
-          <p class="text-[11px] text-slate-500 mt-2">
+          <p class="text-[11px] text-slate-400 mt-2">
             Nomor registrasi tercantum pada surat panggilan magang Anda.
           </p>
         </div>
@@ -558,7 +571,7 @@ setInterval(function () {
 function gantiTabMasuk(t) {
   ST.tabMasuk = t;
   const aktif = 'flex-1 py-2 rounded-lg text-[13px] font-semibold bg-white shadow-sm text-slate-900';
-  const pasif = 'flex-1 py-2 rounded-lg text-[13px] font-semibold text-slate-500';
+  const pasif = 'flex-1 py-2 rounded-lg text-[13px] font-semibold text-slate-300';
   el('tabPeserta').className = t === 'peserta' ? aktif : pasif;
   el('tabPetugas').className = t === 'petugas' ? aktif : pasif;
   el('formPeserta').classList.toggle('hidden', t !== 'peserta');
